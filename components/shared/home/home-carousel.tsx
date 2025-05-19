@@ -51,7 +51,7 @@ export function HomeCarousel({
                   <h2 className='text-xl md:text-6xl font-bold mb-4 text-primary'>
                     {item.title}
                   </h2>
-                  <Button className='hidden md:block bg-yellow-400 text-black hover:bg-yellow-500 rounded font-bold px-6 py-2 shadow-lg transition'>
+                  <Button className='bg-yellow-400 text-black hover:bg-yellow-500 rounded font-bold px-3 py-1 text-sm shadow-lg transition w-full md:w-auto md:mt-0 md:px-6 md:py-2 md:text-base'>
                     {item.buttonCaption}
                   </Button>
                 </div>
