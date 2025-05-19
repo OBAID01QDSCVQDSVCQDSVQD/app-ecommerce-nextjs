@@ -26,33 +26,33 @@ export default function Footer() {
             </a>
           </div>
         </div>
-        {/* About Us */}
+        {/* À propos de nous */}
         <div>
-          <h3 className="font-bold text-lg mb-4">About Us</h3>
+          <h3 className="font-bold text-lg mb-4">À propos de nous</h3>
           <ul className="space-y-2 text-gray-300">
-            <li><Link href="#">Careers</Link></li>
-            <li><Link href="#">Our Stores</Link></li>
-            <li><Link href="#">Our Cares</Link></li>
-            <li><Link href="#">Terms & Conditions</Link></li>
-            <li><Link href="#">Privacy Policy</Link></li>
+            <li><Link href="#">Carrières</Link></li>
+            <li><Link href="#">Nos magasins</Link></li>
+            <li><Link href="#">Nos engagements</Link></li>
+            <li><Link href="#">Termes & Conditions</Link></li>
+            <li><Link href="#">Politique de confidentialité</Link></li>
           </ul>
         </div>
-        {/* Customer Care */}
+        {/* Service client */}
         <div>
-          <h3 className="font-bold text-lg mb-4">Customer Care</h3>
+          <h3 className="font-bold text-lg mb-4">Service client</h3>
           <ul className="space-y-2 text-gray-300">
-            <li><Link href="#">Help Center</Link></li>
-            <li><Link href="#">Track Your Order</Link></li>
-            <li><Link href="#">Corporate & Bulk Purchasing</Link></li>
-            <li><Link href="#">Returns & Refunds</Link></li>
+            <li><Link href="#">Centre d'aide</Link></li>
+            <li><Link href="#">Suivre votre commande</Link></li>
+            <li><Link href="#">Achats en gros & entreprises</Link></li>
+            <li><Link href="#">Retours & Remboursements</Link></li>
           </ul>
         </div>
-        {/* Contact Us */}
+        {/* Contact */}
         <div>
-          <h3 className="font-bold text-lg mb-4">Contact Us</h3>
-          <p className="text-gray-300 text-sm mb-2">70 Washington Square South, New York, NY 10012, United States</p>
-          <p className="text-gray-300 text-sm mb-2">Email: uilib.help@gmail.com</p>
-          <p className="text-gray-300 text-sm mb-4">Phone: +1 1123 456 780</p>
+          <h3 className="font-bold text-lg mb-4">Contact</h3>
+          <p className="text-gray-300 text-sm mb-2">Route Attar Mornaguia la manouba Tunisie</p>
+          <p className="text-gray-300 text-sm mb-2">Email : Contact@sdkbatiment.tn</p>
+          <p className="text-gray-300 text-sm mb-4">Téléphone : +216 53520222</p>
           <div className="flex gap-3 mb-4">
             <a href="#" className="bg-[#232936] p-2 rounded-full hover:bg-[#3b4252] transition"><FaTwitter /></a>
             <a href="#" className="bg-[#232936] p-2 rounded-full hover:bg-[#3b4252] transition"><FaFacebook /></a>
