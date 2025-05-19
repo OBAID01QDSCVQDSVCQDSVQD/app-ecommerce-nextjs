@@ -3,8 +3,15 @@
 import { FaFacebook, FaInstagram, FaTwitter, FaYoutube, FaGoogle, FaCog } from 'react-icons/fa';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 export default function Footer() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <footer className="bg-[#2d3442] text-white pt-12 pb-6 px-4">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
@@ -22,7 +29,7 @@ export default function Footer() {
               <Image src="/google-play-badge.png" alt="Google Play" width={140} height={40} />
             </a>
             <a href="#" target="_blank" rel="noopener noreferrer">
-              <Image src="/app-store-badge.png" alt="App Store" width={140} height={40} />
+              <Image src="/app-store-dma-apple.png" alt="App Store" width={140} height={40} />
             </a>
           </div>
         </div>
@@ -61,9 +68,11 @@ export default function Footer() {
             <a href="#" className="bg-[#232936] p-2 rounded-full hover:bg-[#3b4252] transition"><FaGoogle /></a>
           </div>
           <div className="flex justify-end">
-            <button className="bg-[#232936] p-3 rounded-xl shadow-lg hover:bg-[#3b4252] transition">
-              <FaCog className="text-xl" />
-            </button>
+            {isMounted && (
+              <button className="bg-[#232936] p-3 rounded-xl shadow-lg hover:bg-[#3b4252] transition">
+                <FaCog className="text-xl" />
+              </button>
+            )}
           </div>
         </div>
       </div>
