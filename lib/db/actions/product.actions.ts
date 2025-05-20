@@ -1,4 +1,5 @@
 import Product, { IProduct } from '@/lib/db/models/product.model'
+import { connectToDatabase } from '@/lib/db'
 // GET PRODUCTS BY TAG
 export async function getProductsByTag({
   tag,
