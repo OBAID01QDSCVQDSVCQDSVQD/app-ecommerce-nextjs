@@ -19,7 +19,7 @@ export default function Footer() {
         <div>
           <div className="flex items-center gap-2 mb-4">
             <Image src="/icones/logo.svg" alt="bazaar logo" width={60} height={60} />
-            <span className="text-2xl font-bold">bazaar</span>
+            <span className="text-2xl font-bold">SI OBAID</span>
           </div>
           <p className="text-gray-300 mb-6 text-sm">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Auctor libero id et, in gravida. Sit diam duis mauris nulla cursus. Erat et lectus vel ut sollicitudin elit at amet.

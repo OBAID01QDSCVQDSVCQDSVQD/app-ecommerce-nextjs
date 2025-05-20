@@ -48,7 +48,7 @@ export default function Header() {
           </select>
           <input
             type="text"
-            placeholder="Search Amazon"
+            placeholder="Search by si Obayd"
             className="flex-1 px-2 md:px-4 py-1 bg-white text-black focus:outline-none text-xs md:text-sm h-full"
           />
           <button type="submit" className="bg-[#febd69] hover:bg-yellow-400 text-black px-2 md:px-4 rounded-r-md flex items-center justify-center h-full">
