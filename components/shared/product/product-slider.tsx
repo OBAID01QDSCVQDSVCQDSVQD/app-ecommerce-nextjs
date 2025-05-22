@@ -26,7 +26,7 @@ export default function ProductSlider({
   )
   return (
     <div className='w-full bg-background'>
-      <h2 className='h2-bold mb-5'>{title}</h2>
+      <h2 className='text-xl md:text-2xl font-extrabold mb-5 text-gray-900 dark:text-white'>{title}</h2>
       <Carousel opts={{ align: 'start' }} className='w-full' plugins={[plugin.current]}>
         <CarouselContent>
           {products.map((product) => (
