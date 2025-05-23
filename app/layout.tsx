@@ -1,6 +1,7 @@
 import TopHeader from '@/components/shared/header/header1'
 import Header from '@/components/shared/header'
 import Footer from '@/components/shared/footer'
+import '@/app/globals.css'
 
 export default function RootLayout({
   children,
