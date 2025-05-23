@@ -35,3 +35,9 @@ export function formatError(error: unknown) {
   if (error instanceof Error) return error.message
   return String(error)
 }
+
+export const round2 = (num: number) =>
+  Math.round((num + Number.EPSILON) * 100) / 100
+
+export const generateId = () =>
+  Array.from({ length: 24 }, () => Math.floor(Math.random() * 10)).join('')

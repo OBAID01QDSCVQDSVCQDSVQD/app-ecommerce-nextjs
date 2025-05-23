@@ -4,6 +4,7 @@ import Link from 'next/link'
 import data from '@/lib/data'
 import { MenuIcon, X } from 'lucide-react'
 import { useState } from 'react'
+import CartButton from './cart-button'
 
 export default function Menu() {
   const [open, setOpen] = useState(false)
@@ -63,6 +64,11 @@ export default function Menu() {
                 </Link>
               ))}
             </nav>
+            <div className='flex justify-end'>
+              <nav className='flex gap-3 w-full'>
+                <CartButton />
+              </nav>
+            </div>
           </div>
         </div>
       )}
@@ -79,3 +85,4 @@ export default function Menu() {
     </>
   )
 }
+

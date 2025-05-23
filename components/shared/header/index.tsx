@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FaMapMarkerAlt, FaUser, FaShoppingCart, FaGlobe } from 'react-icons/fa';
 import Menu from './menu';
+import CartButton from './cart-button';
 import { useState, useEffect } from 'react';
 import { MoreVertical } from 'lucide-react';
 import { FaMoon, FaSun } from 'react-icons/fa';
@@ -73,14 +74,14 @@ export default function Header() {
             <span className="text-xs">Returns</span>
             <span className="font-bold text-sm">& Orders</span>
           </div>
-          {/* أيقونة السلة فقط في الجوال */}
-          <Link href="/cart" className="flex items-center gap-1 px-1 md:px-2 hover:text-[#febd69] transition">
-            <div className="relative">
-              <FaShoppingCart className="w-6 h-6 md:w-7 md:h-7" />
-              <span className="absolute -top-2 left-4 bg-[#febd69] text-black text-xs font-bold rounded-full px-1">0</span>
-            </div>
-            <span className="font-bold text-xs md:text-sm mt-2 hidden md:inline">Cart</span>
-          </Link>
+          {/* أيقونة السلة للجوال */}
+          <div className="md:hidden flex items-center">
+            <CartButton />
+          </div>
+          {/* أيقونة السلة للشاشات الكبيرة */}
+          <div className="hidden md:flex items-center">
+            <CartButton />
+          </div>
           {/* أيقونة الثلاث نقاط للجوال */}
           <button className="block md:hidden ml-1 p-2" onClick={() => setDrawerOpen(true)} aria-label="Menu">
             <MoreVertical className="w-6 h-6" />
