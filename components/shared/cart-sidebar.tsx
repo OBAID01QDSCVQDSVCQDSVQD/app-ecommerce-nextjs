@@ -17,6 +17,7 @@ import { TrashIcon } from 'lucide-react'
 import ProductPrice from './product/product-price'
 import { FREE_SHIPPING_MIN_PRICE } from '@/lib/constants'
 import styles from './cart-sidebar.module.css'
+import { useRouter } from 'next/navigation'
 
 export default function CartSidebar({ onClose }: { onClose?: () => void }) {
   const {
@@ -24,6 +25,7 @@ export default function CartSidebar({ onClose }: { onClose?: () => void }) {
     updateItem,
     removeItem,
   } = useCartStore()
+  const router = useRouter()
 
   return (
     <div className='w-80 max-w-xs'>
@@ -96,11 +98,16 @@ export default function CartSidebar({ onClose }: { onClose?: () => void }) {
             )}
 
             <Link
+              href='/cart'
               className={cn(
                 buttonVariants({ variant: 'outline' }),
                 'rounded-full hover:no-underline w-full bg-green-600 text-white hover:bg-green-700 border-green-600 transition font-bold'
               )}
-              href='/cart'
+              onClick={e => {
+                e.preventDefault()
+                if (onClose) onClose()
+                router.push('/cart')
+              }}
             >
               Go to Cart
             </Link>

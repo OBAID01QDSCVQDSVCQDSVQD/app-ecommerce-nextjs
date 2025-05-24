@@ -72,7 +72,7 @@ export default function CartButton() {
             )}
             style={{ minWidth: 320, maxWidth: 360 }}
           >
-            <CartSidebar onClose={handleClose} isClosing={isClosing} />
+            <CartSidebar onClose={handleClose} />
           </div>
         )}
         <style jsx global>{`

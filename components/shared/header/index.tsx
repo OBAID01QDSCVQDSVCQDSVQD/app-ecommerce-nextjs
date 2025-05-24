@@ -80,10 +80,7 @@ export default function Header() {
           </div>
           {/* أيقونة السلة للشاشات الكبيرة */}
           <div className="hidden md:flex items-center">
-            <CartButton onCartClick={typeof window !== 'undefined' ? (() => {
-              const event = new CustomEvent('openCartSidebar')
-              window.dispatchEvent(event)
-            }) : undefined} />
+            <CartButton />
           </div>
           {/* أيقونة الثلاث نقاط للجوال */}
           <button className="block md:hidden ml-1 p-2" onClick={() => setDrawerOpen(true)} aria-label="Menu">
