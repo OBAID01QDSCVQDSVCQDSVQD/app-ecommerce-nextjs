@@ -16,6 +16,7 @@ export const toSlug = (text: string): string =>
     .replace(/[^\w\s-]+/g, '')
     .replace(/\s+/g, '-')
     .replace(/^-+|-+$/g, '')
+    .replace(/-+/g, '-')
 
 const CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
   currency: 'USD',
@@ -41,3 +42,7 @@ export const round2 = (num: number) =>
 
 export const generateId = () =>
   Array.from({ length: 24 }, () => Math.floor(Math.random() * 10)).join('')
+
+export function getDirection(locale: string) {
+  return ['ar', 'he', 'fa', 'ur'].includes(locale) ? 'rtl' : 'ltr'
+}

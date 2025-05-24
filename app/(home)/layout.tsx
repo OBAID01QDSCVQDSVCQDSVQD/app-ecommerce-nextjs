@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
+import ClientProviders from "@/components/shared/client-providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,6 +22,21 @@ export const metadata: Metadata = {
   description: APP_DESCRIPTION,
 }
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return children;
+
+
+
+export default async function HomeLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <div className='flex flex-col min-h-screen'>
+     
+      <main className='flex-1 flex flex-col'>
+        <ClientProviders>{children}</ClientProviders>
+      </main>
+     
+    </div>
+  )
 }

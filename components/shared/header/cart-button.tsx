@@ -5,6 +5,8 @@ import Link from 'next/link'
 import useIsMounted from '@/hooks/use-is-mounted'
 import { cn } from '@/lib/utils'
 import useCartStore from '@/hooks/use-cart-store'
+import useCartSidebar from '@/hooks/use-cart-sidebar'
+import useShowSidebar from '@/hooks/use-cart-sidebar'
 
 export default function CartButton() {
   const isMounted = useIsMounted()
@@ -26,8 +28,10 @@ export default function CartButton() {
           >
             {cartItemsCount}
           </span>
+        
         )}
         <span className='font-bold'>Cart</span>
+       
       </div>
     </Link>
   )

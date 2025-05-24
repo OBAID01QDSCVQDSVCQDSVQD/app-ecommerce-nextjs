@@ -3,6 +3,8 @@ import Header from '@/components/shared/header'
 import Footer from '@/components/shared/footer'
 import '@/app/globals.css'
 
+import ClientProviders from '@/components/shared/client-providers'
+
 export default function RootLayout({
   children,
 }: {
@@ -13,7 +15,10 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col">
         <TopHeader />
         <Header />
-        <main className="flex-1 flex flex-col">{children}</main>
+       
+        
+        {children}
+          
         <Footer />
       </body>
     </html>
