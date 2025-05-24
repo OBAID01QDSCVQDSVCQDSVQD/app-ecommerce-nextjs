@@ -1,6 +1,5 @@
 'use client'
-import React from 'react'
-import useCartSidebar from '@/hooks/use-cart-sidebar'
+import React, { useEffect, useState } from 'react'
 import CartSidebar from './cart-sidebar'
 import { Toaster } from 'sonner'
 
@@ -9,14 +8,20 @@ export default function ClientProviders({
 }: {
   children: React.ReactNode
 }) {
-  const isCartSidebarOpen = useCartSidebar()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+
+  useEffect(() => {
+    const handler = () => setIsSidebarOpen(true)
+    window.addEventListener('openCartSidebar', handler)
+    return () => window.removeEventListener('openCartSidebar', handler)
+  }, [])
 
   return (
     <>
-      {isCartSidebarOpen ? (
+      {isSidebarOpen ? (
         <div className='flex min-h-screen'>
           <div className='flex-1 overflow-hidden'>{children}</div>
-          <CartSidebar />
+          <CartSidebar onClose={() => setIsSidebarOpen(false)} />
         </div>
       ) : (
         <div>{children}</div>

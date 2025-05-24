@@ -1,3 +1,4 @@
+import ClientProviders from '@/components/shared/client-providers'
 import React from 'react'
 
 
@@ -14,7 +15,7 @@ export default async function RootLayout({
       
       <main className='flex-1 flex flex-col p-4'>
       
-     {children}
+      <ClientProviders>{children}</ClientProviders>
      
       </main>
       
