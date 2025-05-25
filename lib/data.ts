@@ -1,5 +1,265 @@
-import { Data, IProductInput } from '@/types'
+import { Data, IProductInput, IUserInput } from '@/types'
 import { toSlug } from './utils'
+import bcrypt from 'bcryptjs'
+
+const users: IUserInput[] = [
+  {
+    name: 'John',
+    email: 'admin@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'Admin',
+    address: {
+      fullName: 'John Doe',
+      street: '111 Main St',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '10001',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'Stripe',
+    emailVerified: false,
+  },
+  {
+    name: 'Jane',
+    email: 'jane@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'User',
+    address: {
+      fullName: 'Jane Harris',
+      street: '222 Main St',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '1002',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'Cash On Delivery',
+    emailVerified: false,
+  },
+  {
+    name: 'Jack',
+    email: 'jack@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'User',
+    address: {
+      fullName: 'Jack Ryan',
+      street: '333 Main St',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '1003',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'PayPal',
+    emailVerified: false,
+  },
+  {
+    name: 'Sarah',
+    email: 'sarah@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'User',
+    address: {
+      fullName: 'Sarah Smith',
+      street: '444 Main St',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '1005',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'Cash On Delivery',
+    emailVerified: false,
+  },
+  {
+    name: 'Michael',
+    email: 'michael@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'User',
+    address: {
+      fullName: 'John Alexander',
+      street: '555 Main St',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '1006',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'PayPal',
+    emailVerified: false,
+  },
+  {
+    name: 'Emily',
+    email: 'emily@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'User',
+    address: {
+      fullName: 'Emily Johnson',
+      street: '666 Main St',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '10001',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'Stripe',
+    emailVerified: false,
+  },
+  {
+    name: 'Alice',
+    email: 'alice@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'User',
+    address: {
+      fullName: 'Alice Cooper',
+      street: '777 Main St',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '10007',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'Cash On Delivery',
+    emailVerified: false,
+  },
+  {
+    name: 'Tom',
+    email: 'tom@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'User',
+    address: {
+      fullName: 'Tom Hanks',
+      street: '888 Main St',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '10008',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'Stripe',
+    emailVerified: false,
+  },
+  {
+    name: 'Linda',
+    email: 'linda@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'User',
+    address: {
+      fullName: 'Linda Holmes',
+      street: '999 Main St',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '10009',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'PayPal',
+    emailVerified: false,
+  },
+  {
+    name: 'George',
+    email: 'george@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'User',
+    address: {
+      fullName: 'George Smith',
+      street: '101 First Ave',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '10010',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'Stripe',
+    emailVerified: false,
+  },
+  {
+    name: 'Jessica',
+    email: 'jessica@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'User',
+    address: {
+      fullName: 'Jessica Brown',
+      street: '102 First Ave',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '10011',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'Cash On Delivery',
+    emailVerified: false,
+  },
+  {
+    name: 'Chris',
+    email: 'chris@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'User',
+    address: {
+      fullName: 'Chris Evans',
+      street: '103 First Ave',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '10012',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'PayPal',
+    emailVerified: false,
+  },
+  {
+    name: 'Samantha',
+    email: 'samantha@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'User',
+    address: {
+      fullName: 'Samantha Wilson',
+      street: '104 First Ave',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '10013',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'Stripe',
+    emailVerified: false,
+  },
+  {
+    name: 'David',
+    email: 'david@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'User',
+    address: {
+      fullName: 'David Lee',
+      street: '105 First Ave',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '10014',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'Cash On Delivery',
+    emailVerified: false,
+  },
+  {
+    name: 'Anna',
+    email: 'anna@example.com',
+    password: bcrypt.hashSync('123456', 5),
+    role: 'User',
+    address: {
+      fullName: 'Anna Smith',
+      street: '106 First Ave',
+      city: 'New York',
+      province: 'NY',
+      postalCode: '10015',
+      country: 'USA',
+      phone: '123-456-7890',
+    },
+    paymentMethod: 'PayPal',
+    emailVerified: false,
+  },
+  // ... باقي المستخدمين كما في رسالتك ...
+]
 
 const products: IProductInput[] = [
   // T-Shirts
@@ -204,7 +464,7 @@ const products: IProductInput[] = [
     countInStock: 54,
     numSales: 21,
     description:
-      'Silver Jeans Co. Jace Slim Fit Bootcut Jeans - Consider Jace a modern cowboy jean. It sits below the waist and features a slim fit through the hip and thigh. Finished with an 18” bootcut leg opening that complements the slimmer silhouette while still fitting over boots',
+      'Silver Jeans Co. Jace Slim Fit Bootcut Jeans - Consider Jace a modern cowboy jean. It sits below the waist and features a slim fit through the hip and thigh. Finished with an 18" bootcut leg opening that complements the slimmer silhouette while still fitting over boots',
     sizes: ['30Wx30L', '34Wx30L', '36Wx30L'],
     colors: ['Blue', 'Grey'],
 
@@ -716,6 +976,7 @@ const products: IProductInput[] = [
 
 const data: Data = {
     products,
+    users,
     headerMenus: [
         {
             name: 'Home',
@@ -777,6 +1038,9 @@ const data: Data = {
 
   }
 
+  
+
+export { users }
 export default data
 
 

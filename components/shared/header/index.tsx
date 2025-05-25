@@ -7,6 +7,7 @@ import CartButton from './cart-button';
 import { useState, useEffect } from 'react';
 import { MoreVertical } from 'lucide-react';
 import { FaMoon, FaSun } from 'react-icons/fa';
+import UserButton from './user-button';
 
 export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -66,9 +67,8 @@ export default function Header() {
             <FaGlobe className="text-xl" />
             <span className="text-xs font-bold">EN</span>
           </div>
-          <div className="hidden md:flex flex-col items-start px-2 cursor-pointer hover:underline">
-            <span className="text-xs">Hello, sign in</span>
-            <span className="font-bold text-sm">Account & Lists</span>
+          <div className="hidden md:flex items-center px-2">
+            <UserButton />
           </div>
           <div className="hidden md:flex flex-col items-start px-2 cursor-pointer hover:underline">
             <span className="text-xs">Returns</span>

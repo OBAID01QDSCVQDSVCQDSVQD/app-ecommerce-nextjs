@@ -5,6 +5,7 @@ import data from '@/lib/data'
 import { MenuIcon, X } from 'lucide-react'
 import { useState } from 'react'
 import CartButton from './cart-button'
+import UserButton from './user-button'
 
 export default function Menu() {
   const [open, setOpen] = useState(false)
@@ -67,6 +68,7 @@ export default function Menu() {
             <div className='flex justify-end'>
               <nav className='flex gap-3 w-full'>
                 <CartButton />
+                <UserButton />
               </nav>
             </div>
           </div>

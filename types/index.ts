@@ -1,9 +1,12 @@
-import { CartSchema, OrderItemSchema, ProductInputSchema } from '@/lib/validator'
+import { CartSchema, OrderItemSchema, ProductInputSchema, UserInputSchema, UserSignInSchema } from '@/lib/validator'
 import { z } from 'zod'
 
 export type IProductInput = z.infer<typeof ProductInputSchema>
+export type IUserInput = z.infer<typeof UserInputSchema>
+export type IUserSignIn = z.infer<typeof UserSignInSchema>
 export type Data = {
   products: IProductInput[]
+  users: IUserInput[]
   headerMenus: {
     name: string
     href: string

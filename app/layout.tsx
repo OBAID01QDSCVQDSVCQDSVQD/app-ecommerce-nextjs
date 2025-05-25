@@ -2,6 +2,8 @@ import TopHeader from '@/components/shared/header/header1'
 import Header from '@/components/shared/header'
 import Footer from '@/components/shared/footer'
 import '@/app/globals.css'
+import { SessionProvider } from "next-auth/react"
+import { signIn } from 'next-auth/react'
 
 import ClientProviders from '@/components/shared/client-providers'
 
@@ -13,13 +15,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col">
-        <TopHeader />
-        <Header />
-       
-        
-        {children}
+        <SessionProvider>
+          <TopHeader />
+          <Header />
+         
           
-        <Footer />
+          {children}
+            
+          <Footer />
+        </SessionProvider>
       </body>
     </html>
   )
