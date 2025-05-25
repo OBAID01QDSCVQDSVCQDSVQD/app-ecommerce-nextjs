@@ -15,6 +15,7 @@ interface UserButtonProps {
 
 export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [lang, setLang] = useState('EN');
   const user = null; // غيّرها لاحقًا حسب حالة تسجيل الدخول
@@ -48,14 +49,14 @@ export default function Header() {
           </div>
         </div>
         {/* وسط */}
-        <form className="flex flex-1 mx-2 md:mx-4 h-8 md:h-10 max-w-xs md:max-w-2xl">
+        <form className="hidden md:flex flex-1 mx-2 md:mx-4 h-8 md:h-10 max-w-xs md:max-w-2xl">
           <select className="rounded-l-md bg-gray-100 text-gray-700 px-2 border-r border-gray-300 focus:outline-none text-xs w-12 md:w-16 h-full">
             <option>All</option>
           </select>
           <input
             type="text"
             placeholder="Search by si Obayd"
-            className="flex-1 px-2 md:px-4 py-1 bg-white text-black focus:outline-none text-xs md:text-sm h-full"
+            className="px-2 md:px-4 py-1 bg-white text-black focus:outline-none text-xs md:text-sm h-full flex-1 min-w-[60px] max-w-[120px] md:min-w-0 md:max-w-2xl md:flex-1"
           />
           <button type="submit" className="bg-[#febd69] hover:bg-yellow-400 text-black px-2 md:px-4 rounded-r-md flex items-center justify-center h-full">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -64,6 +65,17 @@ export default function Header() {
             </svg>
           </button>
         </form>
+        {/* زر البحث للجوال فقط */}
+        <button
+          className="block md:hidden p-2 rounded-md bg-[#febd69]"
+          aria-label="Search"
+          onClick={() => setSearchOpen(true)}
+        >
+          <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
+          </svg>
+        </button>
         {/* يمين */}
         <div className="flex items-center gap-1 md:gap-2 w-auto flex-shrink-0">
           {/* عناصر اليمين تظهر فقط في md وما فوق */}
@@ -97,6 +109,31 @@ export default function Header() {
         </div>
       </div>
       <Menu />
+      {/* نافذة البحث المنبثقة للجوال */}
+      {searchOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 bg-black/40" onClick={() => setSearchOpen(false)} />
+          <div className="relative bg-white rounded shadow-lg p-4 w-[90vw] max-w-xs flex flex-col gap-3 z-50">
+            <button className="absolute top-2 right-2 text-gray-500" onClick={() => setSearchOpen(false)} aria-label="Close">
+              &times;
+            </button>
+            <form className="flex flex-col gap-2">
+              <select className="rounded bg-gray-100 text-gray-700 px-2 border border-gray-300 focus:outline-none text-xs h-10">
+                <option>All</option>
+                {/* يمكنك إضافة الكاتيجوري هنا */}
+              </select>
+              <input
+                type="text"
+                placeholder="Search by si Obayd"
+                className="px-3 py-2 bg-white text-black focus:outline-none text-sm rounded border border-gray-300"
+              />
+              <button type="submit" className="bg-[#febd69] hover:bg-yellow-400 text-black font-bold py-2 rounded mt-2">
+                Search
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
       {/* Drawer */}
       {drawerOpen && (
         <div className="fixed inset-0 z-50 flex justify-end">
@@ -175,7 +212,11 @@ export function UserButtonMobileIcon() {
             className="fixed inset-0 bg-black/40 z-50"
             onClick={handleClose}
           />
-          <UserButton onClose={handleClose} isMobileOverlay={true} />
+          <div
+            className="fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xs bg-white text-black rounded shadow-lg border border-gray-200 py-4 min-w-[180px] flex flex-col items-center"
+          >
+            <UserButton onClose={handleClose} />
+          </div>
         </>
       )}
     </div>
