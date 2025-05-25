@@ -1,5 +1,6 @@
 'use client'
 import { redirect, useSearchParams } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -46,11 +47,17 @@ export default function CredentialsSignInForm() {
 
   const onSubmit = async (data: IUserSignIn) => {
     try {
-      await signInWithCredentials({
+      const res = await signIn('credentials', {
+        redirect: false,
         email: data.email,
         password: data.password,
+        callbackUrl,
       })
-      redirect(callbackUrl)
+      if (res?.error) {
+        toast.error('Invalid email or password')
+      } else if (res?.ok) {
+        window.location.href = callbackUrl
+      }
     } catch (error) {
       if (isRedirectError(error)) {
         throw error
