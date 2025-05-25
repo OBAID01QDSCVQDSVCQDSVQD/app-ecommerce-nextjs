@@ -5,9 +5,13 @@ import { FaMapMarkerAlt, FaUser, FaShoppingCart, FaGlobe } from 'react-icons/fa'
 import Menu from './menu';
 import CartButton from './cart-button';
 import { useState, useEffect } from 'react';
-import { MoreVertical } from 'lucide-react';
+import { MoreVertical, User as UserIcon } from 'lucide-react';
 import { FaMoon, FaSun } from 'react-icons/fa';
 import UserButton from './user-button';
+
+interface UserButtonProps {
+  onClose?: () => void;
+}
 
 export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -61,7 +65,7 @@ export default function Header() {
           </button>
         </form>
         {/* يمين */}
-        <div className="flex items-center gap-1 md:gap-2">
+        <div className="flex items-center gap-1 md:gap-2 w-auto flex-shrink-0">
           {/* عناصر اليمين تظهر فقط في md وما فوق */}
           <div className="hidden md:flex items-center gap-1 px-2 cursor-pointer hover:underline">
             <FaGlobe className="text-xl" />
@@ -86,6 +90,10 @@ export default function Header() {
           <button className="block md:hidden ml-1 p-2" onClick={() => setDrawerOpen(true)} aria-label="Menu">
             <MoreVertical className="w-6 h-6" />
           </button>
+          {/* أيقونة الحساب للجوال في أقصى اليمين */}
+          <div className="md:hidden flex items-center ml-auto">
+            <UserButtonMobileIcon />
+          </div>
         </div>
       </div>
       <Menu />
@@ -101,9 +109,9 @@ export default function Header() {
               {user ? (
                 <div className="flex flex-col gap-2">
                   <span className="font-bold text-white">Utilisateur</span>
-                  <button className="text-left text-red-400 hover:underline" onClick={() => {}}>
+                  <Link href="/sign-in" onClick={() => {}}>
                     Se déconnecter
-                  </button>
+                  </Link>
                 </div>
               ) : (
                 <button className="w-full bg-yellow-400 text-black font-bold py-2 rounded hover:bg-yellow-500 mb-2" onClick={() => {}}>
@@ -145,4 +153,31 @@ export default function Header() {
       `}</style>
     </header>
   );
+}
+
+export function UserButtonMobileIcon() {
+  const [open, setOpen] = useState(false)
+  const handleClose = () => setOpen(false)
+  return (
+    <div className="relative">
+      <button
+        className="p-2 rounded-full hover:bg-yellow-400/20 text-white"
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Account"
+        type="button"
+      >
+        <UserIcon className="w-6 h-6" />
+      </button>
+      {open && (
+        <>
+          {/* خلفية شفافة تغطي الشاشة لإغلاق القائمة عند النقر خارجها */}
+          <div
+            className="fixed inset-0 bg-black/40 z-50"
+            onClick={handleClose}
+          />
+          <UserButton onClose={handleClose} isMobileOverlay={true} />
+        </>
+      )}
+    </div>
+  )
 }

@@ -2,13 +2,15 @@
 
 import Link from 'next/link'
 import data from '@/lib/data'
-import { MenuIcon, X } from 'lucide-react'
+import { MenuIcon, X, User as UserIcon } from 'lucide-react'
 import { useState } from 'react'
 import CartButton from './cart-button'
 import UserButton from './user-button'
+import { useSession } from 'next-auth/react'
 
 export default function Menu() {
   const [open, setOpen] = useState(false)
+  const { data: session } = useSession();
 
   return (
     <>
@@ -22,6 +24,8 @@ export default function Menu() {
           <MenuIcon className="w-5 h-5" />
           <span>All</span>
         </button>
+        {/* نص Hello واسم المستخدم للجوال */}
+        <HelloUser />
         {/* القائمة الأفقية للشاشات المتوسطة وما فوق */}
         <nav className="gap-2 items-center h-full hidden md:flex">
           <Link href="#" className="flex items-center gap-1 text-white font-bold px-2 py-1 hover:text-yellow-400 transition h-full">
@@ -37,8 +41,6 @@ export default function Menu() {
               {item.name}
             </Link>
           ))}
-          {/* زر الحساب/تسجيل الدخول */}
-          <UserButton />
         </nav>
       </div>
       {/* النافذة الجانبية (Drawer) */}
@@ -67,10 +69,6 @@ export default function Menu() {
                 </Link>
               ))}
             </nav>
-            <div className='flex justify-end mt-4'>
-              {/* زر الحساب/تسجيل الدخول في النافذة الجانبية */}
-              <UserButton />
-            </div>
           </div>
         </div>
       )}
@@ -86,5 +84,37 @@ export default function Menu() {
       `}</style>
     </>
   )
+}
+
+// مكون أيقونة الحساب للجوال
+function UserButtonMobileIcon() {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="relative">
+      <button
+        className="p-2 rounded-full hover:bg-yellow-400/20 text-white"
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Account"
+        type="button"
+      >
+        <UserIcon className="w-6 h-6" />
+      </button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-56 bg-white text-black rounded shadow-lg z-50 border border-gray-200 py-2 min-w-[180px]">
+          <UserButton />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function HelloUser() {
+  'use client'
+  const { data: session } = useSession();
+  return (
+    <div className="md:hidden flex items-center ml-2 text-white font-bold text-sm">
+      Hello{session && session.user?.name ? `, ${session.user.name}` : ''}
+    </div>
+  );
 }
 
