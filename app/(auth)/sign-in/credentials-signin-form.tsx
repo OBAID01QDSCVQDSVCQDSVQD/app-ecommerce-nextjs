@@ -1,6 +1,7 @@
 'use client'
 import { redirect, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,6 +38,7 @@ const signInDefaultValues =
 export default function CredentialsSignInForm() {
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/'
+  const error = searchParams.get('error')
 
   const form = useForm<IUserSignIn>({
     resolver: zodResolver(UserSignInSchema),
@@ -44,6 +46,7 @@ export default function CredentialsSignInForm() {
   })
 
   const { control, handleSubmit } = form
+  const [formError, setFormError] = useState<string | null>(null)
 
   const onSubmit = async (data: IUserSignIn) => {
     try {
@@ -54,6 +57,7 @@ export default function CredentialsSignInForm() {
         callbackUrl,
       })
       if (res?.error) {
+        setFormError('Incorrect email or password')
         toast.error('Invalid email or password')
       } else if (res?.ok) {
         window.location.href = callbackUrl
@@ -62,6 +66,7 @@ export default function CredentialsSignInForm() {
       if (isRedirectError(error)) {
         throw error
       }
+      setFormError('Incorrect email or password')
       toast.error('Invalid email or password')
     }
   }
@@ -102,6 +107,12 @@ export default function CredentialsSignInForm() {
               </FormItem>
             )}
           />
+
+          {(error === 'CredentialsSignin' || formError) && (
+            <div className="text-red-600 font-bold my-2">
+              Incorrect email or password
+            </div>
+          )}
 
           <div>
             <Button type='submit'>Sign In</Button>

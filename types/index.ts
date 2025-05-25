@@ -4,6 +4,13 @@ import { z } from 'zod'
 export type IProductInput = z.infer<typeof ProductInputSchema>
 export type IUserInput = z.infer<typeof UserInputSchema>
 export type IUserSignIn = z.infer<typeof UserSignInSchema>
+export type IUserSignUp = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  whatsapp: string;
+}
 export type Data = {
   products: IProductInput[]
   users: IUserInput[]

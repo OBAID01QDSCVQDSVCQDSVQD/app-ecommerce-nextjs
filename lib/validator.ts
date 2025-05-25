@@ -100,6 +100,7 @@ export const UserInputSchema = z.object({
   emailVerified: z.boolean(),
   role: UserRole,
   password: Password,
+  whatsapp: z.string().min(8, 'WhatsApp number is required').regex(/^(\+|0)[0-9]{8,}$/,'Invalid WhatsApp number'),
   paymentMethod: z.string().min(1, 'Payment method is required'),
   address: z.object({
     fullName: z.string().min(1, 'Full name is required'),
@@ -116,3 +117,14 @@ export const UserSignInSchema = z.object({
   email: Email,
   password: Password,
 })
+
+export const UserSignUpSchema = z.object({
+  name: z.string().min(2, 'Name is required'),
+  email: Email,
+  password: Password,
+  confirmPassword: z.string().min(3, 'Confirm password is required'),
+  whatsapp: z.string().min(8, 'WhatsApp number is required').regex(/^(\+|0)[0-9]{8,}$/,'Invalid WhatsApp number'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+});
