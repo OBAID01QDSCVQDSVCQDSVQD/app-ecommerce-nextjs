@@ -37,6 +37,8 @@ export default function Menu() {
               {item.name}
             </Link>
           ))}
+          {/* زر الحساب/تسجيل الدخول */}
+          <UserButton />
         </nav>
       </div>
       {/* النافذة الجانبية (Drawer) */}
@@ -65,11 +67,9 @@ export default function Menu() {
                 </Link>
               ))}
             </nav>
-            <div className='flex justify-end'>
-              <nav className='flex gap-3 w-full'>
-                <CartButton />
-                <UserButton />
-              </nav>
+            <div className='flex justify-end mt-4'>
+              {/* زر الحساب/تسجيل الدخول في النافذة الجانبية */}
+              <UserButton />
             </div>
           </div>
         </div>
