@@ -8,6 +8,7 @@ const users: IUserInput[] = [
     email: 'admin@example.com',
     password: bcrypt.hashSync('123456', 5),
     role: 'Admin',
+    whatsapp: '123-456-7890',
     address: {
       fullName: 'John Doe',
       street: '111 Main St',
@@ -16,6 +17,7 @@ const users: IUserInput[] = [
       postalCode: '10001',
       country: 'USA',
       phone: '123-456-7890',
+      
     },
     paymentMethod: 'Stripe',
     emailVerified: false,
@@ -25,6 +27,7 @@ const users: IUserInput[] = [
     email: 'jane@example.com',
     password: bcrypt.hashSync('123456', 5),
     role: 'User',
+    whatsapp: '123-456-7890',
     address: {
       fullName: 'Jane Harris',
       street: '222 Main St',
@@ -33,32 +36,18 @@ const users: IUserInput[] = [
       postalCode: '1002',
       country: 'USA',
       phone: '123-456-7890',
+    
     },
     paymentMethod: 'Cash On Delivery',
     emailVerified: false,
   },
-  {
-    name: 'Jack',
-    email: 'jack@example.com',
-    password: bcrypt.hashSync('123456', 5),
-    role: 'User',
-    address: {
-      fullName: 'Jack Ryan',
-      street: '333 Main St',
-      city: 'New York',
-      province: 'NY',
-      postalCode: '1003',
-      country: 'USA',
-      phone: '123-456-7890',
-    },
-    paymentMethod: 'PayPal',
-    emailVerified: false,
-  },
+  
   {
     name: 'Sarah',
     email: 'sarah@example.com',
     password: bcrypt.hashSync('123456', 5),
     role: 'User',
+    whatsapp: '123-456-7890',
     address: {
       fullName: 'Sarah Smith',
       street: '444 Main St',
@@ -67,32 +56,18 @@ const users: IUserInput[] = [
       postalCode: '1005',
       country: 'USA',
       phone: '123-456-7890',
+      
     },
     paymentMethod: 'Cash On Delivery',
     emailVerified: false,
   },
-  {
-    name: 'Michael',
-    email: 'michael@example.com',
-    password: bcrypt.hashSync('123456', 5),
-    role: 'User',
-    address: {
-      fullName: 'John Alexander',
-      street: '555 Main St',
-      city: 'New York',
-      province: 'NY',
-      postalCode: '1006',
-      country: 'USA',
-      phone: '123-456-7890',
-    },
-    paymentMethod: 'PayPal',
-    emailVerified: false,
-  },
+ 
   {
     name: 'Emily',
     email: 'emily@example.com',
     password: bcrypt.hashSync('123456', 5),
     role: 'User',
+    whatsapp: '123-456-7890',
     address: {
       fullName: 'Emily Johnson',
       street: '666 Main St',
@@ -101,6 +76,7 @@ const users: IUserInput[] = [
       postalCode: '10001',
       country: 'USA',
       phone: '123-456-7890',
+     
     },
     paymentMethod: 'Stripe',
     emailVerified: false,
@@ -110,6 +86,7 @@ const users: IUserInput[] = [
     email: 'alice@example.com',
     password: bcrypt.hashSync('123456', 5),
     role: 'User',
+    whatsapp: '123-456-7890',
     address: {
       fullName: 'Alice Cooper',
       street: '777 Main St',
@@ -118,6 +95,7 @@ const users: IUserInput[] = [
       postalCode: '10007',
       country: 'USA',
       phone: '123-456-7890',
+    
     },
     paymentMethod: 'Cash On Delivery',
     emailVerified: false,
@@ -127,6 +105,7 @@ const users: IUserInput[] = [
     email: 'tom@example.com',
     password: bcrypt.hashSync('123456', 5),
     role: 'User',
+    whatsapp: '123-456-7890',
     address: {
       fullName: 'Tom Hanks',
       street: '888 Main St',
@@ -135,6 +114,7 @@ const users: IUserInput[] = [
       postalCode: '10008',
       country: 'USA',
       phone: '123-456-7890',
+    
     },
     paymentMethod: 'Stripe',
     emailVerified: false,
@@ -144,6 +124,7 @@ const users: IUserInput[] = [
     email: 'linda@example.com',
     password: bcrypt.hashSync('123456', 5),
     role: 'User',
+    whatsapp: '123-456-7890',
     address: {
       fullName: 'Linda Holmes',
       street: '999 Main St',
@@ -152,6 +133,8 @@ const users: IUserInput[] = [
       postalCode: '10009',
       country: 'USA',
       phone: '123-456-7890',
+     
+
     },
     paymentMethod: 'PayPal',
     emailVerified: false,
@@ -161,6 +144,7 @@ const users: IUserInput[] = [
     email: 'george@example.com',
     password: bcrypt.hashSync('123456', 5),
     role: 'User',
+    whatsapp: '123-456-7890',
     address: {
       fullName: 'George Smith',
       street: '101 First Ave',
@@ -169,6 +153,7 @@ const users: IUserInput[] = [
       postalCode: '10010',
       country: 'USA',
       phone: '123-456-7890',
+     
     },
     paymentMethod: 'Stripe',
     emailVerified: false,
@@ -178,6 +163,7 @@ const users: IUserInput[] = [
     email: 'jessica@example.com',
     password: bcrypt.hashSync('123456', 5),
     role: 'User',
+    whatsapp: '123-456-7890',
     address: {
       fullName: 'Jessica Brown',
       street: '102 First Ave',
@@ -186,6 +172,8 @@ const users: IUserInput[] = [
       postalCode: '10011',
       country: 'USA',
       phone: '123-456-7890',
+     
+
     },
     paymentMethod: 'Cash On Delivery',
     emailVerified: false,
@@ -195,6 +183,7 @@ const users: IUserInput[] = [
     email: 'chris@example.com',
     password: bcrypt.hashSync('123456', 5),
     role: 'User',
+    whatsapp: '123-456-7890',
     address: {
       fullName: 'Chris Evans',
       street: '103 First Ave',
@@ -203,6 +192,7 @@ const users: IUserInput[] = [
       postalCode: '10012',
       country: 'USA',
       phone: '123-456-7890',
+      
     },
     paymentMethod: 'PayPal',
     emailVerified: false,
@@ -212,6 +202,7 @@ const users: IUserInput[] = [
     email: 'samantha@example.com',
     password: bcrypt.hashSync('123456', 5),
     role: 'User',
+    whatsapp: '123-456-7890',
     address: {
       fullName: 'Samantha Wilson',
       street: '104 First Ave',
@@ -220,6 +211,7 @@ const users: IUserInput[] = [
       postalCode: '10013',
       country: 'USA',
       phone: '123-456-7890',
+    
     },
     paymentMethod: 'Stripe',
     emailVerified: false,
@@ -229,6 +221,7 @@ const users: IUserInput[] = [
     email: 'david@example.com',
     password: bcrypt.hashSync('123456', 5),
     role: 'User',
+    whatsapp: '123-456-7890',
     address: {
       fullName: 'David Lee',
       street: '105 First Ave',
@@ -237,6 +230,7 @@ const users: IUserInput[] = [
       postalCode: '10014',
       country: 'USA',
       phone: '123-456-7890',
+      
     },
     paymentMethod: 'Cash On Delivery',
     emailVerified: false,
@@ -246,6 +240,7 @@ const users: IUserInput[] = [
     email: 'anna@example.com',
     password: bcrypt.hashSync('123456', 5),
     role: 'User',
+    whatsapp: '123-456-7890',
     address: {
       fullName: 'Anna Smith',
       street: '106 First Ave',
@@ -254,6 +249,7 @@ const users: IUserInput[] = [
       postalCode: '10015',
       country: 'USA',
       phone: '123-456-7890',
+     
     },
     paymentMethod: 'PayPal',
     emailVerified: false,

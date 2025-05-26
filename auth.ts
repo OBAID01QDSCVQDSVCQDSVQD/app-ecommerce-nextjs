@@ -7,6 +7,7 @@ import User from './lib/db/models/user.model'
 
 import NextAuth, { type DefaultSession } from 'next-auth'
 import authConfig from './auth.config'
+import { Adapter } from 'next-auth/adapters'
 
 declare module 'next-auth' {
   // eslint-disable-next-line no-unused-vars
@@ -28,7 +29,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60,
   },
-  adapter: MongoDBAdapter(client),
+  adapter: MongoDBAdapter(client) as Adapter,
   providers: [
     CredentialsProvider({
       credentials: {
@@ -71,9 +72,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             role: 'user',
           })
         }
+      
         token.name = user.name || user.email!.split('@')[0]
-        token.role = (user as { role: string }).role
+      
+        if ('role' in user && typeof user.role === 'string') {
+          token.role = user.role
+        } else {
+          token.role = 'user' // قيمة افتراضية
+        }
       }
+      
 
       if (session?.user?.name && trigger === 'update') {
         token.name = session.user.name
@@ -81,13 +89,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token
     },
     session: async ({ session, user, trigger, token }) => {
-      session.user.id = token.sub as string
-      session.user.role = token.role as string
-      session.user.name = token.name
-      if (trigger === 'update') {
+      if (token?.sub) {
+        (session.user as any).id = token.sub
+      }
+    
+      if (token?.role) {
+        (session.user as any).role = token.role
+      } else {
+        (session.user as any).role = 'user' // fallback role
+      }
+    
+      if (token?.name) {
+        session.user.name = token.name
+      }
+    
+      if (trigger === 'update' && user?.name) {
         session.user.name = user.name
       }
+    
       return session
-    },
+    }
+    
   },
 })
