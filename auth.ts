@@ -1,117 +1,107 @@
-import { MongoDBAdapter } from '@auth/mongodb-adapter'
-import bcrypt from 'bcryptjs'
+// auth.ts
+import NextAuth, { DefaultSession, type AuthOptions, type Session } from 'next-auth'
+import { getServerSession } from 'next-auth'
+import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { connectToDatabase } from './lib/db'
+import bcrypt from 'bcryptjs'
+import { MongoDBAdapter } from '@auth/mongodb-adapter'
 import client from './lib/db/client'
 import User from './lib/db/models/user.model'
-
-import NextAuth, { type DefaultSession } from 'next-auth'
-import authConfig from './auth.config'
+import { connectToDatabase } from './lib/db'
 import { Adapter } from 'next-auth/adapters'
 
+// ✅ توسعة Session و Token
 declare module 'next-auth' {
-  // eslint-disable-next-line no-unused-vars
   interface Session {
     user: {
+      id: string
       role: string
     } & DefaultSession['user']
   }
+  interface User {
+    id: string
+    role: string
+  }
+  interface JWT {
+    id: string
+    role: string
+  }
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  ...authConfig,
+const fullAuthConfig: AuthOptions = {
+  adapter: MongoDBAdapter(client) as Adapter,
+  providers: [
+    GoogleProvider({
+      clientId: process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+    }),
+    CredentialsProvider({
+      credentials: {
+        email: { type: 'email' },
+        password: { type: 'password' },
+      },
+      async authorize(credentials) {
+        await connectToDatabase()
+        if (!credentials) return null
+        const user = await User.findOne({ email: credentials.email })
+        if (!user || !user.password) return null
+
+        const isValid = await bcrypt.compare(credentials.password, user.password)
+        if (!isValid) return null
+
+        return {
+          id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        }
+      },
+    }),
+  ],
   pages: {
     signIn: '/sign-in',
-    newUser: '/sign-up',
     error: '/sign-in',
+    newUser: '/sign-up',
   },
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60,
   },
-  adapter: MongoDBAdapter(client) as Adapter,
-  providers: [
-    CredentialsProvider({
-      credentials: {
-        email: {
-          type: 'email',
-        },
-        password: { type: 'password' },
-      },
-      async authorize(credentials) {
-        await connectToDatabase()
-        if (credentials == null) return null
-
-        const user = await User.findOne({ email: credentials.email })
-
-        if (user && user.password) {
-          const isMatch = await bcrypt.compare(
-            credentials.password as string,
-            user.password
-          )
-          if (isMatch) {
-            return {
-              id: user._id,
-              name: user.name,
-              email: user.email,
-              role: user.role,
-            }
-          }
-        }
-        return null
-      },
-    }),
-  ],
   callbacks: {
-    jwt: async ({ token, user, trigger, session }) => {
+    async jwt({ token, user }) {
       if (user) {
-        if (!user.name) {
-          await connectToDatabase()
-          await User.findByIdAndUpdate(user.id, {
-            name: user.name || user.email!.split('@')[0],
-            role: 'user',
-          })
-        }
-      
-        token.name = user.name || user.email!.split('@')[0]
-      
-        if (user && typeof (user as any).role === 'string') {
-          token.role = (user as any).role
-        } else {
-          token.role = 'user'
-        }
+        token.id =
+          (user as any).id ||
+          (user as any)._id?.toString() ||
+          (user as any).sub ||
+          token.sub || ''
+    
+        token.role = (user as any).role || token.role || 'user'
+        token.name = user.name || token.name
+        token.email = user.email || token.email
       }
-      
 
-      if (session?.user?.name && trigger === 'update') {
-        token.name = session.user.name
-      }
       return token
     },
-    session: async ({ session, user, trigger, token }) => {
-      if (token?.sub) {
-        (session.user as any).id = token.sub
-      }
-    
-      if (token?.role) {
-        (session.user as any).role = token.role
-      } else {
-        (session.user as any).role = 'user' // fallback role
-      }
-    
-      if (token?.name) {
-        session.user.name = token.name
-      }
-    
-      if (trigger === 'update' && user?.name) {
-        session.user.name = user.name
-      }
-    
+    async session({ session, token }) {
+      session.user.id = (token.id as string) || (token.sub as string) || ''
+      session.user.role = token.role as string
+      session.user.name = token.name as string
+      session.user.email = token.email as string
       return session
     }
     
   },
-})
+}
 
+// ✅ استخراج الوظائف
+const authResult = NextAuth(fullAuthConfig)
 
-console.log('auth:', auth)
+export const GET = authResult.handlers?.GET
+export const POST = authResult.handlers?.POST
+export const authHandler = authResult.auth
+export const signIn = authResult.signIn
+export const signOut = authResult.signOut
+
+// ✅ function للاستعمال في Server Components
+export const auth = (): Promise<Session | null> => getServerSession(fullAuthConfig)

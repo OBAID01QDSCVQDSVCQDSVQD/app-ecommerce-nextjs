@@ -21,7 +21,9 @@ export default function RootLayout({
         <Header />
        
         
-        {children}
+        <SessionProvider>
+          {children}
+        </SessionProvider>
           
         <Footer />
         </SessionProvider>
