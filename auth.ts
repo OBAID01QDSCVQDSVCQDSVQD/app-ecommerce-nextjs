@@ -75,10 +75,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       
         token.name = user.name || user.email!.split('@')[0]
       
-        if ('role' in user && typeof user.role === 'string') {
-          token.role = user.role
+        if (user && typeof (user as any).role === 'string') {
+          token.role = (user as any).role
         } else {
-          token.role = 'user' // قيمة افتراضية
+          token.role = 'user'
         }
       }
       
