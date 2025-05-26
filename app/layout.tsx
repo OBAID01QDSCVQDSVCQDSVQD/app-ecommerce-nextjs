@@ -17,13 +17,13 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <SessionProvider>
-          <TopHeader />
-          <Header />
-         
+        <TopHeader />
+        <Header />
+       
+        
+        {children}
           
-          {children}
-            
-          <Footer />
+        <Footer />
         </SessionProvider>
       </body>
     </html>

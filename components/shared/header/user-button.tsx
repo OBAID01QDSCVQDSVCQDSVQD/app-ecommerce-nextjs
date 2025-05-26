@@ -49,7 +49,7 @@ export default function UserButton({ onClose, isMobileOverlay }: UserButtonProps
               : 'absolute right-0 mt-2 w-56 bg-white text-black rounded shadow-lg z-50 border border-gray-200 py-2 min-w-[180px]'
           }
         >
-          {session ? (
+        {session ? (
             <>
               <div className="px-4 py-2 border-b border-gray-200">
                 <div className="font-bold">{session.user?.name}</div>
@@ -63,19 +63,19 @@ export default function UserButton({ onClose, isMobileOverlay }: UserButtonProps
               <button
                 onClick={() => { signOut({ callbackUrl: '/' }); handleClose(); }}
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500"
-              >
-                Sign out
+                >
+                  Sign out
               </button>
             </>
-          ) : (
+        ) : (
             <>
               <Link href="/sign-in" className="block px-4 py-2 hover:bg-gray-100 font-bold text-blue-600" onClick={handleClose}>Sign in</Link>
               <div className="px-4 py-2 text-xs text-gray-500">New Customer?</div>
               <Link href="/sign-up" className="block px-4 py-2 hover:bg-gray-100" onClick={handleClose}>Create your account</Link>
             </>
           )}
-        </div>
-      )}
+              </div>
+        )}
     </div>
   )
 }
