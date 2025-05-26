@@ -1,19 +1,33 @@
-import type { NextAuthConfig } from 'next-auth'
+import GoogleProvider from 'next-auth/providers/google'
+import CredentialsProvider from 'next-auth/providers/credentials'
+import type { AuthOptions } from 'next-auth'
+import { checkUserCredentials } from '@/lib/lib/auth/checkUserCredentials'
 
-// Notice this is only an object, not a full Auth.js instance
-export default {
-  providers: [],
+const authConfig: AuthOptions = {
+  providers: [
+    GoogleProvider({
+      clientId: process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+    }),
+    CredentialsProvider({
+      credentials: {
+        email: { type: 'email' },
+        password: { type: 'password' },
+      },
+      async authorize(credentials) {
+        return await checkUserCredentials(credentials as { email?: string, password?: string })
+      },
+    }),
+  ],
+  secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    signIn: '/sign-in',
+  },
   callbacks: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    authorized({ request, auth }: any) {
-      const protectedPaths = [
-        /\/checkout(\/.*)?/,
-        /\/account(\/.*)?/,
-        /\/admin(\/.*)?/,
-      ]
-      const { pathname } = request.nextUrl
-      if (protectedPaths.some((p) => p.test(pathname))) return !!auth
-      return true
+    async redirect({ url, baseUrl }) {
+      return baseUrl
     },
   },
-} satisfies NextAuthConfig
+}
+
+export default authConfig

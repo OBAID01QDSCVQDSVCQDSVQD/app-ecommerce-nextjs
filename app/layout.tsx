@@ -1,3 +1,4 @@
+'use client'
 import TopHeader from '@/components/shared/header/header1'
 import Header from '@/components/shared/header'
 import Footer from '@/components/shared/footer'
@@ -14,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col">
+      <body>
         <SessionProvider>
           <TopHeader />
           <Header />

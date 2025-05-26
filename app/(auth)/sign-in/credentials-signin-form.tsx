@@ -23,6 +23,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { UserSignInSchema } from '@/lib/validator'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { APP_NAME } from '@/lib/constants'
+import { FcGoogle } from "react-icons/fc"
 
 const signInDefaultValues =
   process.env.NODE_ENV === 'development'
@@ -117,6 +118,7 @@ export default function CredentialsSignInForm() {
           <div>
             <Button type='submit'>Sign In</Button>
           </div>
+
           <div className='text-sm'>
             By signing in, you agree to {APP_NAME}&apos;s{' '}
             <Link href='/page/conditions-of-use'>Conditions of Use</Link> and{' '}
