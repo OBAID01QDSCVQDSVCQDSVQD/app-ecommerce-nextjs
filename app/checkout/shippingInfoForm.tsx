@@ -12,13 +12,19 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const ShippingInfoForm = () => {
+    const { data: session } = useSession();
+    const userId = session?.user?.id ?? null; // ✅ fallback to null
+    const router = useRouter();
+
     const cartItems = useCartStore((state) => state.cart.items);
     const totalPrice = cartItems.reduce(
         (acc, item) => acc + item.price * item.quantity,
         0
     );
+    const clearCart = useCartStore((state) => state.clearCart);
 
     const [formData, setFormData] = useState({
         firstName: "",
@@ -41,11 +47,8 @@ const ShippingInfoForm = () => {
     };
 
     const handleSubmit = async () => {
-        const router = useRouter();
-
-        // بعد result:
-        router.push("/thank-you");
         try {
+            console.log("🟡 Submitting order with userId:", userId);
             const res = await fetch("/api/checkout", {
                 method: "POST",
                 headers: {
@@ -53,9 +56,9 @@ const ShippingInfoForm = () => {
                 },
                 body: JSON.stringify({
                     shippingData: formData,
-                    cartItems: cartItems,
-                    totalPrice: totalPrice,
-                    userId: null, // بدلها بـ session?.user.id إذا لزم
+                    cartItems,
+                    totalPrice,
+                    userId,
                 }),
             });
 
@@ -64,14 +67,14 @@ const ShippingInfoForm = () => {
             const result = await res.json();
             console.log("✅ Order created:", result.order);
 
-            // مثال على success message
             alert("✔️ Order placed successfully!");
-
-            // تنجم تزيد redirect:
-            // router.push("/thank-you");
+            clearCart();
+            router.push("/thank-you");
+            router.refresh();
         } catch (err) {
-            console.error("❌ Error during checkout:", err);
-            alert("حدث خطأ أثناء إرسال الطلب.");
+            console.error("❌ Error during checkout:", err)
+            alert("❌ Failed to place order. Check console for details.")
+
         }
     };
 

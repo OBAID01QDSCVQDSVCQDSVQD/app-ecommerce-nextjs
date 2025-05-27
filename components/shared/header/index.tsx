@@ -3,11 +3,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FaMapMarkerAlt, FaUser, FaShoppingCart, FaGlobe } from 'react-icons/fa';
 import Menu from './menu';
-import CartButton from './cart-button';
+
 import { useState, useEffect } from 'react';
 import { MoreVertical, User as UserIcon } from 'lucide-react';
 import { FaMoon, FaSun } from 'react-icons/fa';
 import UserButton from './user-button';
+import CartButton from './cart-button'
 
 interface UserButtonProps {
   onClose?: () => void;

@@ -1,6 +1,8 @@
-import { signIn } from 'next-auth/react'
- 
-export const SignInWithGoogle = async () => {
-  'use server'
-  await signIn('google')
-} 
+'use server'
+
+import { redirect } from 'next/navigation'
+
+export const signInWithGoogle = async () => {
+  // إعادة التوجيه إلى Google OAuth
+  redirect('/api/auth/signin?provider=google')
+}

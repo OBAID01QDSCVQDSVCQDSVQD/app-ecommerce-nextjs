@@ -20,10 +20,11 @@ interface CartState {
   addItem: (item: OrderItem, quantity: number) => Promise<string>
   updateItem: (item: OrderItem, quantity: number) => Promise<void>
   removeItem: (item: OrderItem) => Promise<void>
+  clearCart: () => void
 }
 
-const useCartStore = create(
-  persist<CartState>(
+const useCartStore = create<CartState>()(
+  persist(
     (set, get) => ({
       cart: initialState,
 
@@ -118,6 +119,17 @@ const useCartStore = create(
         })
       },
       init: () => set({ cart: initialState }),
+      clearCart: () => set({
+        cart: {
+          items: [],
+          itemsPrice: 0,
+          taxPrice: undefined,
+          shippingPrice: undefined,
+          totalPrice: 0,
+          paymentMethod: undefined,
+          deliveryDateIndex: undefined,
+        }
+      }),
     }),
     {
       name: 'cart-store',

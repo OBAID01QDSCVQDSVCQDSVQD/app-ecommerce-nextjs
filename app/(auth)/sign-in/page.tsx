@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   title: 'Sign In',
 }
 
+
 export default async function SignIn(props: {
   searchParams: Promise<{
     callbackUrl: string

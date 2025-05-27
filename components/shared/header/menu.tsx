@@ -4,9 +4,9 @@ import Link from 'next/link'
 import data from '@/lib/data'
 import { MenuIcon, X, User as UserIcon } from 'lucide-react'
 import { useState } from 'react'
-import CartButton from './cart-button'
 import UserButton from './user-button'
 import { useSession } from 'next-auth/react'
+
 
 export default function Menu() {
   const [open, setOpen] = useState(false)

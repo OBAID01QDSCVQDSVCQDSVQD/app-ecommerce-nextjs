@@ -28,6 +28,11 @@ export async function createOrderWithShipping(
 ) {
   await connectToDatabase();
 
+  console.clear();
+  console.log("userId sent from client:", userId);
+
+  console.log("userId before saving in DB:", userId);
+
   const shippingDoc = await ShippingInfo.create(shippingData);
 
   const orderDoc = await Order.create({

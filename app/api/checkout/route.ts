@@ -1,32 +1,34 @@
-// app/api/checkout/route.ts
-import { NextResponse } from "next/server";
-import { createOrderWithShipping } from "@/lib/db/actions/order.actions";
+
+
+
+
+import { NextResponse } from 'next/server'
+import { connectToDatabase } from '@/lib/db'
+import { Order } from '@/lib/db/models/order.model'
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    console.log('📦 API /checkout called'); 
+    await connectToDatabase()
 
-    const {
-      shippingData,
-      cartItems,
-      totalPrice,
-      userId, // تنجم تجيبها من الـ session إذا تحب
-    } = body;
+    const body = await req.json()
+    const { shippingData, cartItems, totalPrice, userId } = body
 
     if (!shippingData || !cartItems || !totalPrice) {
-      return NextResponse.json({ error: "Missing data" }, { status: 400 });
+      return NextResponse.json({ error: 'Missing data' }, { status: 400 })
     }
 
-    const order = await createOrderWithShipping(
-      shippingData,
+    const order = await Order.create({
+      userId: userId || null, // ✅ null إذا المستخدم مش مسجّل
+      shippingInfo: shippingData,
       cartItems,
       totalPrice,
-      userId
-    );
+      status: 'pending',
+    })
 
-    return NextResponse.json({ order }, { status: 200 });
-  } catch (err) {
-    console.error("Checkout Error:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ order }, { status: 200 })
+  } catch (error) {
+    console.error('❌ Checkout Error:', error) // ⬅️ باش نعرف السبب
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
