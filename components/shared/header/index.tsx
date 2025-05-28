@@ -66,6 +66,7 @@ export default function Header() {
             </svg>
           </button>
         </form>
+
         {/* زر البحث للجوال فقط */}
         <button
           className="block md:hidden p-2 rounded-md bg-[#febd69]"
@@ -77,6 +78,11 @@ export default function Header() {
             <path d="M21 21l-4.35-4.35" />
           </svg>
         </button>
+        {/* Returns & Orders بجانب البحث للموبايل فقط */}
+        <Link href="/orders" className="mx-2 text-yellow-400 flex-col items-start font-bold text-base hover:text-yellow-500 transition flex items-center md:hidden">
+          <span className="text-xs">Returns</span>
+          <span className="font-bold text-sm">& Orders</span>
+        </Link>
         {/* يمين */}
         <div className="flex items-center gap-1 md:gap-2 w-auto flex-shrink-0">
           {/* عناصر اليمين تظهر فقط في md وما فوق */}
@@ -91,6 +97,7 @@ export default function Header() {
             <span className="text-xs">Returns</span>
             <span className="font-bold text-sm">& Orders</span>
           </div>
+
           {/* أيقونة السلة للجوال */}
           <div className="md:hidden flex items-center">
             <CartButton />
@@ -99,14 +106,17 @@ export default function Header() {
           <div className="hidden md:flex items-center">
             <CartButton />
           </div>
-          {/* أيقونة الثلاث نقاط للجوال */}
-          <button className="block md:hidden ml-1 p-2" onClick={() => setDrawerOpen(true)} aria-label="Menu">
-            <MoreVertical className="w-6 h-6" />
-          </button>
+
           {/* أيقونة الحساب للجوال في أقصى اليمين */}
           <div className="md:hidden flex items-center ml-auto">
             <UserButtonMobileIcon />
           </div>
+          {/* أيقونة الثلاث نقاط للجوال */}
+          <button className="block md:hidden ml-1 p-2" onClick={() => setDrawerOpen(true)} aria-label="Menu">
+            <MoreVertical className="w-6 h-6" />
+          </button>
+          {/* Returns & Orders للجوال */}
+
         </div>
       </div>
       <Menu />
@@ -147,12 +157,12 @@ export default function Header() {
               {user ? (
                 <div className="flex flex-col gap-2">
                   <span className="font-bold text-white">Utilisateur</span>
-                  <Link href="/sign-in" onClick={() => {}}>
+                  <Link href="/sign-in" onClick={() => { }}>
                     Se déconnecter
                   </Link>
                 </div>
               ) : (
-                <button className="w-full bg-yellow-400 text-black font-bold py-2 rounded hover:bg-yellow-500 mb-2" onClick={() => {}}>
+                <button className="w-full bg-yellow-400 text-black font-bold py-2 rounded hover:bg-yellow-500 mb-2" onClick={() => { }}>
                   Se connecter
                 </button>
               )}

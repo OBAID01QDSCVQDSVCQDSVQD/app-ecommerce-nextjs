@@ -11,6 +11,8 @@ import User from '@/lib/db/models/user.model'
 import { connectToDatabase } from '@/lib/db'
 
 export const authConfig: AuthOptions = {
+  secret: process.env.AUTH_SECRET, // 👈 ضروري جدا
+
   adapter: MongoDBAdapter(clientPromise) as Adapter,
 
   providers: [
@@ -27,15 +29,18 @@ export const authConfig: AuthOptions = {
       async authorize(credentials) {
         await connectToDatabase()
         if (!credentials) return null
+
         const user = await User.findOne({ email: credentials.email })
         if (!user || !user.password) return null
+
         const isValid = await bcrypt.compare(credentials.password, user.password)
         if (!isValid) return null
+
         return {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
-          role: user.role,
+          role: user.role || 'user',
         }
       },
     }),
@@ -53,12 +58,18 @@ export const authConfig: AuthOptions = {
       }
       return token
     },
+
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string
-        session.user.role = token.role as string
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id as string,
+          role: token.role as string,
+        },
       }
-      return session
     },
   },
+
+  
 }

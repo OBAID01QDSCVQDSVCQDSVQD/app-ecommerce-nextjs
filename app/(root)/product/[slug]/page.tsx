@@ -118,24 +118,25 @@ export default async function ProductDetails(props: {
                 )}
               </CardContent>
               {product.countInStock !== 0 && (
-                    <div className='flex justify-center items-center'>
-                      <AddToCart
-                        item={{
-                          clientId: generateId(),
-                          product: product._id,
-                          countInStock: product.countInStock,
-                          name: product.name,
-                          slug: product.slug,
-                          category: product.category,
-                          price: round2(product.price),
-                          quantity: 1,
-                          image: product.images[0],
-                          size: size || product.sizes[0],
-                          color: color || product.colors[0],
-                        }}
-                      />
-                    </div>
-                  )}
+  <div className='flex justify-center items-center'>
+    <AddToCart
+      item={{
+        clientId: generateId(),
+        product: product._id,
+        name: product.name,
+        slug: product.slug,
+        category: product.category,
+        price: round2(product.price),
+        quantity: 1,
+        image: product.images[0],
+        size: size || product.sizes[0],
+        color: color || product.colors[0],
+        countInStock: product.countInStock,
+      }}
+    />
+  </div>
+)}
+
             </Card>
           </div>
         </div>
@@ -148,8 +149,8 @@ export default async function ProductDetails(props: {
         />
       </section>
       <section>
-  <BrowsingHistoryList className='mt-10' />
-</section>
+        <BrowsingHistoryList className='mt-10' />
+      </section>
     </div>
   )
 }

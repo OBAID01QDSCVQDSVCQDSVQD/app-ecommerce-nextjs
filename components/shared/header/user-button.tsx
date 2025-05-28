@@ -3,7 +3,7 @@
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, UserIcon } from 'lucide-react'
 
 interface UserButtonProps {
   onClose?: () => void;
@@ -56,7 +56,8 @@ export default function UserButton({ onClose, isMobileOverlay }: UserButtonProps
                 <div className="text-xs text-gray-500">{session.user?.email}</div>
               </div>
               <Link href="/account" className="block px-4 py-2 hover:bg-gray-100" onClick={handleClose}>Your account</Link>
-              <Link href="/account/orders" className="block px-4 py-2 hover:bg-gray-100" onClick={handleClose}>Your orders</Link>
+              <Link href="/orders" className="block px-4 py-2 hover:bg-gray-100" onClick={handleClose}>Your orders</Link>
+              <Link href="/orders" className="block px-4 py-2 hover:bg-gray-100" onClick={handleClose}>Returns & Orders</Link>
               {session.user?.role === 'Admin' && (
                 <Link href="/admin/overview" className="block px-4 py-2 hover:bg-gray-100" onClick={handleClose}>Admin</Link>
               )}
@@ -76,6 +77,37 @@ export default function UserButton({ onClose, isMobileOverlay }: UserButtonProps
           )}
               </div>
         )}
+    </div>
+  )
+}
+
+export function UserButtonMobileIcon() {
+  const [open, setOpen] = useState(false)
+  const handleClose = () => setOpen(false)
+  return (
+    <div className="relative">
+      <button
+        className="p-2 rounded-full hover:bg-yellow-400/20 text-white"
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Account"
+        type="button"
+      >
+        <UserIcon className="w-6 h-6" />
+      </button>
+      {open && (
+        <>
+          {/* خلفية شفافة تغطي الشاشة لإغلاق القائمة عند النقر خارجها */}
+          <div
+            className="fixed inset-0 bg-black/40 z-50"
+            onClick={handleClose}
+          />
+          <div
+            className="fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xs bg-white text-black rounded shadow-lg border border-gray-200 py-4 min-w-[180px] flex flex-col items-center"
+          >
+            <UserButton onClose={handleClose} isMobileOverlay={true} />
+          </div>
+        </>
+      )}
     </div>
   )
 }

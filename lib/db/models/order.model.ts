@@ -4,10 +4,19 @@ const OrderSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: false },
   cartItems: [
     {
-      productId: String,
+      productId: { type: Schema.Types.ObjectId, ref: 'Product' },
       quantity: Number,
       price: Number,
+      name: String,
+      image: String,
+
+      slug: String,
+      category: String,
+      brand: String,
+      size: String,
+      color: String,
     },
+
   ],
   totalPrice: Number,
   shippingInfo: {

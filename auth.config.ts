@@ -15,15 +15,37 @@ const authConfig: AuthOptions = {
         password: { type: 'password' },
       },
       async authorize(credentials) {
-        return await checkUserCredentials(credentials as { email?: string, password?: string })
+        return await checkUserCredentials(credentials as {
+          email?: string
+          password?: string
+        })
       },
     }),
   ],
+
   secret: process.env.NEXTAUTH_SECRET,
+
   pages: {
     signIn: '/sign-in',
   },
+
   callbacks: {
+    async jwt({ token, user }) {
+      // إذا المستخدم تسجل، نحفظ الـ id في التوكن
+      if (user) {
+        token.id = (user as any).id || (user as any)._id
+      }
+      return token
+    },
+
+    async session({ session, token }) {
+      // نمرر الـ id الموجود في التوكن إلى session.user
+      if (session.user) {
+        session.user.id = token.id as string
+      }
+      return session
+    },
+
     async redirect({ url, baseUrl }) {
       return baseUrl
     },

@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 import { APP_DESCRIPTION, APP_NAME, APP_SLOGAN } from '@/lib/constants'
+
 export const metadata: Metadata = {
   title: {
     template: `%s | ${APP_NAME}`,
@@ -35,6 +36,7 @@ export default async function HomeLayout({
      
       <main className='flex-1 flex flex-col'>
         <ClientProviders>{children}</ClientProviders>
+        
       </main>
      
     </div>

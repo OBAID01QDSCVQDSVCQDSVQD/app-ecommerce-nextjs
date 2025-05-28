@@ -41,6 +41,12 @@ export default function Menu() {
               {item.name}
             </Link>
           ))}
+          <Link
+            href="/orders"
+            className="text-white hover:text-yellow-400 font-medium px-2 py-1 transition h-full"
+          >
+            Returns & Orders
+          </Link>
         </nav>
       </div>
       {/* النافذة الجانبية (Drawer) */}
@@ -68,6 +74,13 @@ export default function Menu() {
                   {item.name}
                 </Link>
               ))}
+              <Link
+                href="/orders"
+                className="text-white hover:text-yellow-400 font-medium px-2 py-2 rounded transition"
+                onClick={() => setOpen(false)}
+              >
+                Returns & Orders
+              </Link>
             </nav>
           </div>
         </div>
@@ -114,7 +127,10 @@ function HelloUser() {
   return (
     <div className="md:hidden flex items-center ml-2 text-white font-bold text-sm">
       Hello{session && session.user?.name ? `, ${session.user.name}` : ''}
+      
     </div>
   );
 }
+
+
 
