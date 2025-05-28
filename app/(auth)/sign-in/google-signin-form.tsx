@@ -8,7 +8,7 @@ export default function GoogleSignInForm({ text = 'Sign in with Google' }: { tex
   const [pending, setPending] = useState(false)
   const handleGoogleSignIn = async () => {
     setPending(true)
-    await signIn('google')
+    await signIn('google', { callbackUrl: '/' })
     setPending(false)
   }
   return (
