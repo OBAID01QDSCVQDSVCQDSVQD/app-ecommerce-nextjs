@@ -9,6 +9,7 @@ import { MoreVertical, User as UserIcon } from 'lucide-react';
 import { FaMoon, FaSun } from 'react-icons/fa';
 import UserButton from './user-button';
 import CartButton from './cart-button'
+import { useSession } from 'next-auth/react';
 
 interface UserButtonProps {
   onClose?: () => void;
@@ -21,6 +22,7 @@ export default function Header() {
   const [lang, setLang] = useState('EN');
   const user = null; // غيّرها لاحقًا حسب حالة تسجيل الدخول
   const [isMounted, setIsMounted] = useState(false);
+  const { data: session } = useSession();
 
   useEffect(() => {
     setIsMounted(true);
@@ -79,7 +81,7 @@ export default function Header() {
           </svg>
         </button>
         {/* Returns & Orders بجانب البحث للموبايل فقط */}
-        <Link href="/orders" className="mx-2 text-yellow-400 flex-col items-start font-bold text-base hover:text-yellow-500 transition flex items-center md:hidden">
+        <Link href={session?.user?.id ? "/orders" : "/myorders2"} className="mx-2 text-yellow-400 flex-col items-start font-bold text-base hover:text-yellow-500 transition flex items-center md:hidden">
           <span className="text-xs">Returns</span>
           <span className="font-bold text-sm">& Orders</span>
         </Link>
@@ -93,10 +95,10 @@ export default function Header() {
           <div className="hidden md:flex items-center px-2">
             <UserButton />
           </div>
-          <div className="hidden md:flex flex-col items-start px-2 cursor-pointer hover:underline">
+          <Link href={session?.user?.id ? "/orders" : "/myorders2"} className="hidden md:flex flex-col items-start px-2 cursor-pointer hover:underline">
             <span className="text-xs">Returns</span>
             <span className="font-bold text-sm">& Orders</span>
-          </div>
+          </Link>
 
           {/* أيقونة السلة للجوال */}
           <div className="md:hidden flex items-center">
