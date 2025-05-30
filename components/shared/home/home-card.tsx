@@ -29,11 +29,11 @@ export function HomeCard({ cards }: { cards: CardItem[] }) {
                   className='flex flex-col'
                 >
                   <Image
-                    src={item.image}
-                    alt={item.name}
-                    className='aspect-square object-scale-down max-w-full h-auto mx-auto'
-                    height={120}
-                    width={120}
+                   src={typeof item.image === 'string' ? item.image : '/placeholder.png'}
+                   alt={item.name}
+                   width={120}
+                   height={120}
+                   className='aspect-square object-scale-down max-w-full h-auto mx-auto'
                   />
                   <p className='text-center text-sm whitespace-nowrap overflow-hidden text-ellipsis'>
                     {item.name}

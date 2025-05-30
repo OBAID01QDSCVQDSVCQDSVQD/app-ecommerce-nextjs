@@ -3,7 +3,6 @@ import { HomeCarousel } from '@/components/shared/home/home-carousel'
 import { Card, CardContent } from '@/components/ui/card'
 import data from '@/lib/data'
 import { getAllCategories, getProductsForCard, getProductsByTag } from '@/lib/actions/product.actions' 
-import { toSlug } from '@/lib/utils'
 import ProductSlider from '@/components/shared/product/product-slider'
 import BrowsingHistoryList from '@/components/shared/browsing-history-list'
 
@@ -31,10 +30,12 @@ export default async function HomePage() {
         href: '/search',
       },
       items: categories.map((category) => ({
-        name: category,
-        image: `/images/${toSlug(category)}.jpg`,
-        href: `/search?category=${category}`,
-      })),
+        name: category.name,
+        image: category.image || '/placeholder.jpg',
+        href: `/category/${category.slug}`,
+      }))
+      
+     
     },
     {
       title: 'Explore New Arrivals',
@@ -64,6 +65,8 @@ export default async function HomePage() {
 
   return (
     <>
+      console.log('🎯 categories:', categories)
+
       <HomeCarousel items={data.carousels} />
       <div className='md:p-4 md:space-y-4 bg-border'>
         <HomeCard cards={cards} />

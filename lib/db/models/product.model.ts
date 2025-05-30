@@ -1,10 +1,12 @@
 import { Document, Model, model, models, Schema } from 'mongoose'
 import { IProductInput } from '@/types'
+import mongoose from 'mongoose'
 
-export interface IProduct extends Document, IProductInput {
+export interface IProduct extends Document, Omit<IProductInput, 'category'> {
   _id: string
   createdAt: Date
   updatedAt: Date
+  category: any // أو mongoose.Types.ObjectId | string
 }
 
 const productSchema = new Schema<IProduct>(
@@ -18,10 +20,7 @@ const productSchema = new Schema<IProduct>(
       required: true,
       unique: true,
     },
-    category: {
-      type: String,
-      required: true,
-    },
+    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
     images: [String],
     brand: {
       type: String,

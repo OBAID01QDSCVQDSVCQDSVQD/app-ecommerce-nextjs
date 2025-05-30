@@ -8,6 +8,7 @@ import { ProductInputSchema, ProductUpdateSchema } from '../validator'
 import { IProductInput } from '@/types'
 import { z } from 'zod'
 import { getSetting } from './setting.actions'
+import { Category } from '@/lib/db/models/category.model'
 
 // CREATE
 export async function createProduct(data: IProductInput) {
@@ -122,9 +123,8 @@ export async function getAllProductsForAdmin({
 
 export async function getAllCategories() {
   await connectToDatabase()
-  const categories = await Product.find({ isPublished: true }).distinct(
-    'category'
-  )
+  const categories = await Category.find({}, 'name slug image').lean()
+  
   return categories
 }
 export async function getProductsForCard({
@@ -304,4 +304,18 @@ export async function getAllProducts({
     from: limit * (Number(page) - 1) + 1,
     to: limit * (Number(page) - 1) + products.length,
   }
+}
+
+export async function getCategoryBySlug(slug: string) {
+  await connectToDatabase();
+  const category = await Category.findOne({ slug }).lean() as { _id: string } | null;
+  return category ? JSON.parse(JSON.stringify(category)) : null;
+}
+
+export async function getProductsByCategorySlug(slug: string) {
+  await connectToDatabase();
+  const category = await Category.findOne({ slug }).lean() as { _id: string } | null;
+  if (!category) return [];
+  const products = await Product.find({ category: category._id, isPublished: true }).lean();
+  return JSON.parse(JSON.stringify(products));
 }

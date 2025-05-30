@@ -3,6 +3,7 @@ import { authConfig } from "@/auth";
 import { Order } from '@/lib/db/models/order.model';
 import Product from '@/lib/db/models/product.model';
 import { connectToDatabase } from '@/lib/db';
+import 'dotenv/config'
 
 async function getOrdersByUserId(userId: string) {
   await connectToDatabase();
