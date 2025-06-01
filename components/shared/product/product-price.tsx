@@ -8,6 +8,8 @@ const ProductPrice = ({
   isDeal = false,
   forListing = true,
   plain = false,
+  basePrice,
+  baseListPrice,
 }: {
   price: number
   isDeal?: boolean
@@ -15,8 +17,12 @@ const ProductPrice = ({
   className?: string
   forListing?: boolean
   plain?: boolean
+  basePrice?: number
+  baseListPrice?: number
 }) => {
-  const discountPercent = Math.round(100 - (price / listPrice) * 100)
+  const discountPercent = baseListPrice && basePrice
+    ? Math.round(100 - (basePrice / baseListPrice) * 100)
+    : Math.round(100 - (price / listPrice) * 100)
   const stringValue = price.toString()
   const [intValue, floatValue] = stringValue.includes('.')
     ? stringValue.split('.')
@@ -26,7 +32,7 @@ const ProductPrice = ({
     formatCurrency(price)
   ) : listPrice == 0 ? (
     <div className={cn('text-3xl', className)}>
-      <span className='text-xs align-super'>$</span>
+      <span className='text-xs align-super'>DT</span>
       {intValue}
       <span className='text-xs align-super'>{floatValue}</span>
     </div>
@@ -42,7 +48,7 @@ const ProductPrice = ({
       </div>
       <div className={`flex ${forListing && 'justify-center'} items-center gap-2`}>
         <div className={cn('text-3xl', className)}>
-          <span className='text-xs align-super'>$</span>
+          <span className='text-xs align-super'>DT</span>
           {intValue}
           <span className='text-xs align-super'>{floatValue}</span>
         </div>
@@ -56,7 +62,7 @@ const ProductPrice = ({
       <div className='flex justify-center gap-3'>
         <div className='text-3xl text-orange-700'>-{discountPercent}%</div>
         <div className={cn('text-3xl', className)}>
-          <span className='text-xs align-super'>$</span>
+          <span className='text-xs align-super'>DT</span>
           {intValue}
           <span className='text-xs align-super'>{floatValue}</span>
         </div>

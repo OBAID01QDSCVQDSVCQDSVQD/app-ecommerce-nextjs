@@ -9,39 +9,59 @@ const Price = (field: string) =>
       (value) => /^\d+(\.\d{2})?$/.test(formatNumberWithDecimal(value)),
       `${field} must have exactly two decimal places (e.g., 49.99)`
     )
+
+const AttributeSchema = z.object({
+  attributeId: z.string(),
+  values: z.array(z.string())
+})
+
 export const ProductInputSchema = z.object({
-  name: z.string().min(3, 'Name must be at least 3 characters'),
-  slug: z.string().min(3, 'Slug must be at least 3 characters'),
-  category: z.string().min(1, 'Category is required'),
-  images: z.array(z.string()).min(1, 'Product must have at least one image'),
-  brand: z.string().min(1, 'Brand is required'),
-  description: z.string().min(1, 'Description is required'),
-  isPublished: z.boolean(),
-  price: Price('Price'),
-  listPrice: Price('List price'),
+  name: z.string().min(3, 'Name must be at least 3 characters').optional(),
+  slug: z.string().min(3, 'Slug must be at least 3 characters').optional(),
+  category: z.string().min(1, 'Category is required').optional(),
+  images: z.array(z.string()).min(1, 'Product must have at least one image').optional(),
+  brand: z.string().min(1, 'Brand is required').optional(),
+  description: z.string().min(1, 'Description is required').optional(),
+  isPublished: z.boolean().optional(),
+  price: Price('Price').optional(),
+  listPrice: Price('List price').optional(),
   countInStock: z.coerce
     .number()
     .int()
-    .nonnegative('count in stock must be a non-negative number'),
+    .nonnegative('count in stock must be a non-negative number')
+    .optional(),
   tags: z.array(z.string()).default([]),
   sizes: z.array(z.string()).default([]),
   colors: z.array(z.string()).default([]),
+  attributes: z.array(AttributeSchema).optional(),
+  variants: z.array(z.object({
+    options: z.array(z.object({
+      attributeId: z.string(),
+      value: z.string()
+    })),
+    price: z.string().optional(),
+    image: z.string().optional()
+  })).optional(),
   avgRating: z.coerce
     .number()
     .min(0, 'Average rating must be at least 0')
-    .max(5, 'Average rating must be at most 5'),
+    .max(5, 'Average rating must be at most 5')
+    .optional(),
   numReviews: z.coerce
     .number()
     .int()
-    .nonnegative('Number of reviews must be a non-negative number'),
+    .nonnegative('Number of reviews must be a non-negative number')
+    .optional(),
   ratingDistribution: z
     .array(z.object({ rating: z.number(), count: z.number() }))
-    .max(5),
+    .max(5)
+    .optional(),
   reviews: z.array(z.string()).default([]),
   numSales: z.coerce
     .number()
     .int()
-    .nonnegative('Number of sales must be a non-negative number'),
+    .nonnegative('Number of sales must be a non-negative number')
+    .optional(),
 })
 
 export const ProductUpdateSchema = ProductInputSchema.extend({

@@ -40,7 +40,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
               href={`/product/${product.slug}`}
               className="border rounded p-3 flex flex-col items-center hover:shadow-lg transition"
             >
-              <Image src={product.images?.[0] || '/placeholder.jpg'} alt={product.name} width={120} height={120} className="object-contain mb-2" />
+              <Image src={product.images?.[0] && product.images[0].trim() !== "" ? product.images[0] : '/placeholder.jpg'} alt={product.name} width={120} height={120} className="object-contain mb-2" />
               <div className="font-semibold text-center">{product.name}</div>
             </Link>
           ))}

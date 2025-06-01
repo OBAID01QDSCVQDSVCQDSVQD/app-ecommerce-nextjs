@@ -20,24 +20,34 @@ const ProductCard = ({
   hideBorder?: boolean
   hideAddToCart?: boolean
 }) => {
+  const validImages = product.images?.filter(img => img && typeof img === 'string' && img.trim() !== "") || []
+
   const ProductImage = () => (
     <Link href={`/product/${product.slug}`}>
       <div className='relative h-52'>
-        {product.images.length > 1 ? (
+        {validImages.length > 1 ? (
           <ImageHover
-            src={product.images[0]}
-            hoverSrc={product.images[1]}
+            src={validImages[0]}
+            hoverSrc={validImages[1]}
             alt={product.name}
           />
-        ) : (
+        ) : validImages.length === 1 ? (
           <div className='relative h-52'>
             <Image
-              src={product.images[0]}
+              src={validImages[0]}
               alt={product.name}
               fill
               sizes='80vw'
               className='object-contain'
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = '/placeholder.jpg';
+              }}
             />
+          </div>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gray-100">
+            <span className="text-gray-400">لا توجد صورة متاحة</span>
           </div>
         )}
       </div>
@@ -63,7 +73,7 @@ const ProductCard = ({
       </div>
 
       <ProductPrice
-        isDeal={product.tags.includes('todays-deal')}
+        isDeal={product.tags?.includes('todays-deal') ?? false}
         price={product.price}
         listPrice={product.listPrice}
         forListing

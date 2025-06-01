@@ -1,97 +1,99 @@
 import { Document, Model, model, models, Schema } from 'mongoose'
 import { IProductInput } from '@/types'
 import mongoose from 'mongoose'
+import '@/lib/db/models/attribute.model'
 
-export interface IProduct extends Document, Omit<IProductInput, 'category'> {
+
+export interface IProduct extends Document {
   _id: string
+  name: string
+  slug: string
+  category: any // أو mongoose.Types.ObjectId | string
+  images: string[]
+  brand: string
+  description: string
+  price: number
+  listPrice: number
+  countInStock: number
+  tags?: string[]
+  attributes?: {
+    attribute: string
+    value: string
+    image?: string
+    price?: number
+  }[]
+  variants?: {
+    options: {
+      attributeId: string
+      value: string
+    }[]
+    price?: number
+    image?: string
+  }[]
+  avgRating: number
+  numReviews: number
+  ratingDistribution?: { rating: number; count: number }[]
+  numSales: number
+  isPublished: boolean
+  reviews?: any[]
   createdAt: Date
   updatedAt: Date
-  category: any // أو mongoose.Types.ObjectId | string
 }
 
 const productSchema = new Schema<IProduct>(
   {
-    name: {
-      type: String,
-      required: true,
-    },
-    slug: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
+    name: { type: String },
+    slug: { type: String, unique: true },
+    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
     images: [String],
-    brand: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      trim: true,
-    },
-    price: {
-      type: Number,
-      required: true,
-    },
-    listPrice: {
-      type: Number,
-      required: true,
-    },
-    countInStock: {
-      type: Number,
-      required: true,
-    },
+    brand: { type: String },
+    description: { type: String, trim: true },
+    price: { type: Number },
+    listPrice: { type: Number },
+    countInStock: { type: Number },
     tags: { type: [String], default: ['new arrival'] },
-    colors: { type: [String], default: ['White', 'Red', 'Black'] },
-    sizes: { type: [String], default: ['S', 'M', 'L'] },
-    avgRating: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    numReviews: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
+    attributes: [
+      {
+        attribute: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Attribute',
+        },
+        value: { type: String },
+        image: { type: String },
+        price: { type: Number },
+      },
+    ],
+    variants: [
+      {
+        options: [
+          {
+            attributeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Attribute' },
+            value: { type: String },
+          },
+        ],
+        price: { type: Number },
+        image: { type: String },
+      },
+    ],
+    avgRating: { type: Number, default: 0 },
+    numReviews: { type: Number, default: 0 },
     ratingDistribution: [
       {
-        rating: {
-          type: Number,
-          required: true,
-        },
-        count: {
-          type: Number,
-          required: true,
-        },
+        rating: { type: Number },
+        count: { type: Number },
       },
     ],
-    numSales: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    isPublished: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
-    reviews: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'Review',
-        default: [],
-      },
-    ],
+    numSales: { type: Number, default: 0 },
+    isPublished: { type: Boolean, default: false },
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review', default: [] }],
   },
   {
     timestamps: true,
+    validateBeforeSave: false
   }
 )
 
 const Product =
-  (models.Product as Model<IProduct>) ||
-  model<IProduct>('Product', productSchema)
+  (models.Product as Model<IProduct>) || model<IProduct>('Product', productSchema)
 
 export default Product
