@@ -3,7 +3,6 @@ import { authConfig } from "@/auth";
 import { Order } from '@/lib/db/models/order.model';
 import Product from '@/lib/db/models/product.model';
 import { connectToDatabase } from '@/lib/db';
-import 'dotenv/config'
 
 async function getOrdersByUserId(userId: string) {
   await connectToDatabase();
@@ -83,7 +82,14 @@ export default async function OrdersPage() {
                       <div className="font-semibold text-gray-900 dark:text-white">
                         {item.name ? item.name : <span className="text-red-500 dark:text-red-400">Product not found</span>}
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-300">Qty: <span className="font-bold text-gray-700 dark:text-gray-200">{item.quantity}</span></div>
+                      <div className="text-xs text-gray-500 dark:text-gray-300">
+                        Qty: <span className="font-bold text-gray-700 dark:text-gray-200">{item.quantity}</span>
+                        {item.attributes && item.attributes.length > 0 && (
+                          item.attributes.map((attr: any, idx: number) => (
+                            <span key={idx}> - {attr.attribute}: {attr.value}</span>
+                          ))
+                        )}
+                      </div>
                       <div className="text-xs text-gray-500 dark:text-gray-300">Price: <span className="font-bold text-primary dark:text-yellow-400">${item.price}</span></div>
                     </div>
                   </li>

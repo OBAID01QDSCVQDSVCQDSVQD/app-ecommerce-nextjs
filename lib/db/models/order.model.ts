@@ -13,8 +13,13 @@ const OrderSchema = new Schema({
       slug: String,
       category: String,
       brand: String,
-      size: String,
-      color: String,
+     
+      attributes: [
+        {
+          attribute: String,
+          value: String
+        }
+      ],
     },
 
   ],

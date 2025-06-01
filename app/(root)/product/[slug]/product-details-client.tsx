@@ -147,6 +147,7 @@ export default function ProductDetailsClient({ product, relatedProducts }: { pro
                     quantity: 1,
                     image: galleryImages[0],
                     countInStock: product.countInStock,
+                    attributes: Object.entries(selected).map(([attribute, value]) => ({ attribute, value })),
                   }}
                 />
               </div>

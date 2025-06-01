@@ -31,10 +31,7 @@ const useCartStore = create<CartState>()(
       addItem: async (item: OrderItem, quantity: number) => {
         const { items } = get().cart
         const existItem = items.find(
-          (x) =>
-            x.product === item.product &&
-            x.color === item.color &&
-            x.size === item.size
+          (x) => x.clientId === item.clientId
         )
 
         if (existItem) {
@@ -49,9 +46,7 @@ const useCartStore = create<CartState>()(
 
         const updatedCartItems = existItem
           ? items.map((x) =>
-              x.product === item.product &&
-              x.color === item.color &&
-              x.size === item.size
+              x.clientId === item.clientId
                 ? { ...existItem, quantity: existItem.quantity + quantity }
                 : x
             )
@@ -66,27 +61,14 @@ const useCartStore = create<CartState>()(
             })),
           },
         })
-        // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-        return updatedCartItems.find(
-          (x) =>
-            x.product === item.product &&
-            x.color === item.color &&
-            x.size === item.size
-        )?.clientId!
+        return updatedCartItems.find((x) => x.clientId === item.clientId)?.clientId!
       },
       updateItem: async (item: OrderItem, quantity: number) => {
         const { items } = get().cart
-        const exist = items.find(
-          (x) =>
-            x.product === item.product &&
-            x.color === item.color &&
-            x.size === item.size
-        )
+        const exist = items.find((x) => x.clientId === item.clientId)
         if (!exist) return
         const updatedCartItems = items.map((x) =>
-          x.product === item.product &&
-          x.color === item.color &&
-          x.size === item.size
+          x.clientId === item.clientId
             ? { ...exist, quantity: quantity }
             : x
         )
@@ -102,12 +84,7 @@ const useCartStore = create<CartState>()(
       },
       removeItem: async (item: OrderItem) => {
         const { items } = get().cart
-        const updatedCartItems = items.filter(
-          (x) =>
-            x.product !== item.product ||
-            x.color !== item.color ||
-            x.size !== item.size
-        )
+        const updatedCartItems = items.filter((x) => x.clientId !== item.clientId)
         set({
           cart: {
             ...get().cart,

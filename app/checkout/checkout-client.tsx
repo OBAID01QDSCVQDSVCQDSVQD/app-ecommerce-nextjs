@@ -60,6 +60,8 @@ export default function CheckoutPage() {
     }
   }
 
+  console.log('checkout items:', items)
+
   return (
     <div className="max-w-7xl mx-auto p-4 grid grid-cols-1 md:grid-cols-3 gap-6">
       <div className="md:col-span-2 space-y-6">
@@ -139,7 +141,19 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold">{item.name}</p>
-                      <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                      <p className="text-sm text-gray-500">
+                        Qty: {item.quantity}
+                        {(item as any).attributes && (item as any).attributes.length > 0 && (
+                          <>
+                            {(item as any).attributes.map((attr: any, idx: number) => (
+                              <span key={idx}>
+                                {' - '}
+                                {attr.attribute}: {attr.value}
+                              </span>
+                            ))}
+                          </>
+                        )}
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="font-semibold">

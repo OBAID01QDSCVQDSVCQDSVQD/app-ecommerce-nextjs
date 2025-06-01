@@ -10,13 +10,27 @@ import { notFound } from 'next/navigation'
 import useCartStore from '@/hooks/use-cart-store'
 import { FREE_SHIPPING_MIN_PRICE } from '@/lib/constants'
 import BrowsingHistoryList from '@/components/shared/browsing-history-list'
-import { OrderItem } from '@/types/index'
+
+type CartItemWithAttributes = {
+  image: string;
+  name: string;
+  clientId: string;
+  product: string;
+  slug: string;
+  category: string;
+  quantity: number;
+  countInStock: number;
+  price: number;
+  size?: string;
+  color?: string;
+  attributes?: { attribute: string; value: string }[];
+};
 
 export default function CartAddItem({ itemId }: { itemId: string }) {
   const {
     cart: { items, itemsPrice },
   } = useCartStore()
-  const item = items.find((x: OrderItem) => x.clientId === itemId)
+  const item = items.find((x) => x.clientId === itemId) as CartItemWithAttributes
 
   if (!item) return notFound()
   return (
@@ -41,14 +55,25 @@ export default function CartAddItem({ itemId }: { itemId: string }) {
                 <CheckCircle2Icon className='h-6 w-6 text-green-700' />
                 Added to cart
               </h3>
-              <p className='text-sm'>
-                <span className='font-bold'> Color: </span>{' '}
-                {item.color ?? '-'}
-              </p>
-              <p className='text-sm'>
-                <span className='font-bold'> Size: </span>{' '}
-                {item.size ?? '-'}
-              </p>
+              {Array.isArray(item.attributes) && item.attributes.length > 0 ? (
+                <div className='flex flex-wrap gap-2'>
+                  {item.attributes.map((attr: any, idx: number) => (
+                    <p key={idx} className='text-sm'>
+                      <span className='font-bold'>{attr.attribute}: </span>
+                      {attr.value}
+                    </p>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <p className='text-sm'>
+                    <span className='font-bold'> Color: </span> {item.color ?? '-'}
+                  </p>
+                  <p className='text-sm'>
+                    <span className='font-bold'> Size: </span> {item.size ?? '-'}
+                  </p>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>

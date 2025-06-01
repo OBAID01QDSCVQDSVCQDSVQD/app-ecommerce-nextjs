@@ -26,6 +26,7 @@ interface CartItem {
   brand: string;
   size?: string;
   color?: string;
+  attributes: any;
 }
 
 export async function createOrderWithShipping(
@@ -46,6 +47,7 @@ export async function createOrderWithShipping(
         price: item.price,
         name: product?.name || '',
         image: Array.isArray(product?.images) && product.images.length > 0 ? product.images[0] : '',
+        attributes: item.attributes,
         // أضف أي بيانات أخرى تريد حفظها
       };
     })

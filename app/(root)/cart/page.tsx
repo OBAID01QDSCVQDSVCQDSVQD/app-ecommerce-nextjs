@@ -24,6 +24,10 @@ export default function CartPage() {
     removeItem,
   } = useCartStore()
   const router = useRouter()
+
+  // Log cart items for debugging
+  console.log('cart items:', items)
+
   return (
     <div>
       <div className='grid grid-cols-1 md:grid-cols-4  md:gap-4'>
@@ -73,14 +77,25 @@ export default function CartPage() {
                           {item.name}
                         </Link>
                         <div>
-                          <p className='text-sm'>
-                            <span className='font-bold'>Color: </span>{' '}
-                            {item.color}
-                          </p>
-                          <p className='text-sm'>
-                            <span className='font-bold'>Size: </span>{' '}
-                            {item.size}
-                          </p>
+                          {Array.isArray((item as any).attributes) && (item as any).attributes.length > 0 ? (
+                            <div className='flex flex-wrap gap-2'>
+                              {(item as any).attributes.map((attr: any, idx: number) => (
+                                <p key={idx} className='text-sm'>
+                                  <span className='font-bold'>{attr.attribute}: </span>
+                                  {attr.value}
+                                </p>
+                              ))}
+                            </div>
+                          ) : (
+                            <>
+                              <p className='text-sm'>
+                                <span className='font-bold'>Color: </span> {item.color}
+                              </p>
+                              <p className='text-sm'>
+                                <span className='font-bold'>Size: </span> {item.size}
+                              </p>
+                            </>
+                          )}
                         </div>
                         <div className='flex gap-2 items-center'>
                           <Select

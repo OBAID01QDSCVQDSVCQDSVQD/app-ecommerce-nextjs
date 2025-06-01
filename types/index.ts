@@ -34,5 +34,9 @@ export type Data = {
   }[]
 }
 
-export type OrderItem = z.infer<typeof OrderItemSchema>
+export type OrderItem = z.infer<typeof OrderItemSchema> & {
+  attributes?: { attribute: string; value: string }[];
+};
 export type Cart = z.infer<typeof CartSchema>
+
+console.log('cart items:', CartSchema)

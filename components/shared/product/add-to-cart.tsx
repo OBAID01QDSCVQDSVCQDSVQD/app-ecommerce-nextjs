@@ -27,12 +27,25 @@ export default function AddToCart({
 
   const [quantity, setQuantity] = useState(1)
 
+  function generateCartItemId(item: any) {
+    let key = item.product;
+    if (item.color) key += `-color:${item.color}`;
+    if (item.size) key += `-size:${item.size}`;
+    if (item.attributes && Array.isArray(item.attributes)) {
+      key += item.attributes
+        .map((attr: any) => `-${attr.attribute}:${attr.value}`)
+        .join('');
+    }
+    return key;
+  }
+
   return minimal ? (
     <Button
       className='rounded-full w-auto'
       onClick={() => {
         try {
-          addItem(item, 1)
+          const itemWithId = { ...item, clientId: generateCartItemId(item) };
+          addItem(itemWithId, 1)
           toast('Added to Cart', {
             action: {
               label: 'Go to Cart',
@@ -71,8 +84,9 @@ export default function AddToCart({
         type='button'
         onClick={async () => {
           try {
-            const itemId = await addItem(item, quantity)
-            router.push(`/cart/${itemId}`)
+            const itemWithId = { ...item, clientId: generateCartItemId(item) };
+            const itemId = await addItem(itemWithId, quantity)
+            router.push(`/cart`)
           } catch (error: any) {
             toast.error('Error', {
               description: error.message,
@@ -86,7 +100,8 @@ export default function AddToCart({
         variant='secondary'
         onClick={() => {
           try {
-            addItem(item, quantity)
+            const itemWithId = { ...item, clientId: generateCartItemId(item) };
+            addItem(itemWithId, quantity)
             router.push(`/checkout`)
           } catch (error: any) {
             toast.error('Error', {
