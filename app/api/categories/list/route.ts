@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getAllCategories } from '@/lib/db/actions/category.actions'
+import { connectToDatabase } from '@/lib/db/mongoose'
+import { Category } from '@/lib/db/models/category.model'
 
 export async function GET() {
-  const categories = await getAllCategories()
-  return NextResponse.json(categories)
+  await connectToDatabase()
+  const categories = await Category.find().select('name slug')
+  return NextResponse.json({ categories })
 } 

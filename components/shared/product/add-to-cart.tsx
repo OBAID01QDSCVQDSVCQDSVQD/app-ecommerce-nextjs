@@ -18,9 +18,11 @@ import { useState } from 'react'
 export default function AddToCart({
   item,
   minimal = false,
+  disabled = false,
 }: {
   item: OrderItem
   minimal?: boolean
+  disabled?: boolean
 }) {
   const router = useRouter()
   const { addItem } = useCartStore()
@@ -82,6 +84,7 @@ export default function AddToCart({
       <Button
         className='rounded-full w-full'
         type='button'
+        disabled={disabled}
         onClick={async () => {
           try {
             const itemWithId = { ...item, clientId: generateCartItemId(item) };

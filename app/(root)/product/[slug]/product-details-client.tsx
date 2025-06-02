@@ -26,7 +26,9 @@ export default function ProductDetailsClient({ product, relatedProducts }: { pro
   const [selected, setSelected] = useState<Record<string, string>>(() => {
     const defaults: Record<string, string> = {};
     Object.entries(grouped).forEach(([attrName, values]) => {
-      defaults[attrName] = values[0];
+      if (values.length === 1) {
+        defaults[attrName] = values[0];
+      }
     });
     return defaults;
   });
@@ -73,6 +75,9 @@ export default function ProductDetailsClient({ product, relatedProducts }: { pro
 
   // Price to display
   const displayPrice = selectedVariant?.price ?? product.price;
+
+  // أضف هذا المتغير قبل return
+  const allAttributesSelected = Object.entries(grouped).every(([attrName, values]) => selected[attrName]);
 
   return (
     <section>
@@ -149,6 +154,7 @@ export default function ProductDetailsClient({ product, relatedProducts }: { pro
                     countInStock: product.countInStock,
                     attributes: Object.entries(selected).map(([attribute, value]) => ({ attribute, value })),
                   }}
+                  disabled={!allAttributesSelected}
                 />
               </div>
             )}

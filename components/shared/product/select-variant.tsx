@@ -63,7 +63,12 @@ export default function SelectVariant({
               <button
                 key={val}
                 type="button"
-                className={`px-3 py-1 rounded border ${selected[attrName] === val ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100'}`}
+                className={`px-3 py-1 rounded border transition
+                  ${selected[attrName] === val
+                    ? 'bg-yellow-400 text-black border-yellow-400'
+                    : 'bg-gray-200 text-gray-700 border-gray-300'}
+                  cursor-pointer
+                `}
                 onClick={() => handleSelect(attrName, val)}
               >
                 {val}
