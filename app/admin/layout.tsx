@@ -44,11 +44,10 @@ export default function AdminLayout({
         <div className="relative">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="sticky top-4 left-4 z-30 p-2 rounded-full bg-blue-600 text-white shadow-md md:hidden focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
-            style={{ marginLeft: '1rem' }}
+            className="sticky top-4 left-4 z-30 flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white shadow-md md:hidden focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
             aria-label="Ouvrir le menu"
           >
-            {isSidebarOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
+            {isSidebarOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
           </button>
           {/* Sidebar Panel */}
           <div className={`absolute inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition duration-200 ease-in-out z-10 w-64 bg-white dark:bg-gray-900 shadow-lg`}>

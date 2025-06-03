@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { FiEdit2, FiTrash2, FiPlus, FiX, FiEye } from 'react-icons/fi'
+import { FiEdit2, FiTrash2, FiPlus, FiX, FiEye, FiFilter } from 'react-icons/fi'
 import { toast } from 'react-hot-toast'
 import React from 'react'
 
@@ -47,6 +47,7 @@ export default function AdminProductsPage() {
   const router = useRouter()
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   useEffect(() => {
     fetchCategories()
@@ -176,123 +177,149 @@ export default function AdminProductsPage() {
     <div className="p-6 max-w-7xl mx-auto bg-gray-100 dark:bg-gray-950 min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestion des Produits</h1>
-        <button
-          onClick={() => router.push('/admin/products/create')}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
-        >
-          <FiPlus /> Ajouter un Produit
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={() => setFiltersOpen(true)}
+            className="flex items-center gap-4 px-2 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 shadow hover:bg-blue-50 dark:hover:bg-blue-800 text-blue-600 dark:text-blue-400 text-sm font-semibold transition cursor-pointer"
+          >
+            <FiFilter className="w-4 h-4" />
+            Filtres
+          </button>
+          <button
+            onClick={() => router.push('/admin/products/create')}
+            className="bg-blue-600 text-white px-5 py-1.5 rounded-lg flex items-center gap-2 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors text-sm"
+          >
+            <FiPlus className="w-4 h-4" /> Ajouter un Produit
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-6 mb-6">
-        {/* Filters Panel */}
-        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Filtres</h2>
+      {/* Filters Modal/Panel */}
+      {filtersOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div
+            className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-md mx-2 p-6 relative animate-fade-in max-h-[90vh] overflow-y-auto"
+            onClick={e => e.stopPropagation()}
+          >
             <button
-              onClick={resetFilters}
-              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex items-center gap-2"
+              onClick={() => setFiltersOpen(false)}
+              className="absolute top-3 right-3 text-gray-500 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 text-2xl font-bold focus:outline-none"
+              aria-label="Fermer"
             >
-              <FiX /> Réinitialiser
+              &times;
             </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                Catégorie
-              </label>
-              <select
-                value={filters.category}
-                onChange={(e) => handleFilterChange('category', e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Toutes les Catégories</option>
-                {categories.map((category) => (
-                  <option key={category._id} value={category._id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                Prix Min (€)
-              </label>
-              <input
-                type="number"
-                value={filters.minPrice}
-                onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="0"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                Prix Max (€)
-              </label>
-              <input
-                type="number"
-                value={filters.maxPrice}
-                onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="1000"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                Stock Min
-              </label>
-              <input
-                type="number"
-                value={filters.minStock}
-                onChange={(e) => handleFilterChange('minStock', e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="0"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                Stock Max
-              </label>
-              <input
-                type="number"
-                value={filters.maxStock}
-                onChange={(e) => handleFilterChange('maxStock', e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="100"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                Trier par
-              </label>
-              <select
-                value={filters.sortBy}
-                onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="createdAt">Date de création</option>
-                <option value="price">Prix</option>
-                <option value="name">Nom</option>
-                <option value="stock">Stock</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                Ordre
-              </label>
-              <select
-                value={filters.sortOrder}
-                onChange={(e) => handleFilterChange('sortOrder', e.target.value as 'asc' | 'desc')}
-                className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="desc">Décroissant</option>
-                <option value="asc">Croissant</option>
-              </select>
+            {/* Filters Panel Content */}
+            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Filtres</h2>
+                <button
+                  onClick={resetFilters}
+                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex items-center gap-2"
+                >
+                  <FiX /> Réinitialiser
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                    Catégorie
+                  </label>
+                  <select
+                    value={filters.category}
+                    onChange={(e) => handleFilterChange('category', e.target.value)}
+                    className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Toutes les Catégories</option>
+                    {categories.map((category) => (
+                      <option key={category._id} value={category._id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                    Prix Min (€)
+                  </label>
+                  <input
+                    type="number"
+                    value={filters.minPrice}
+                    onChange={(e) => handleFilterChange('minPrice', e.target.value)}
+                    className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                    Prix Max (€)
+                  </label>
+                  <input
+                    type="number"
+                    value={filters.maxPrice}
+                    onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
+                    className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="1000"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                    Stock Min
+                  </label>
+                  <input
+                    type="number"
+                    value={filters.minStock}
+                    onChange={(e) => handleFilterChange('minStock', e.target.value)}
+                    className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                    Stock Max
+                  </label>
+                  <input
+                    type="number"
+                    value={filters.maxStock}
+                    onChange={(e) => handleFilterChange('maxStock', e.target.value)}
+                    className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                    Trier par
+                  </label>
+                  <select
+                    value={filters.sortBy}
+                    onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                    className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="createdAt">Date de création</option>
+                    <option value="price">Prix</option>
+                    <option value="name">Nom</option>
+                    <option value="stock">Stock</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                    Ordre
+                  </label>
+                  <select
+                    value={filters.sortOrder}
+                    onChange={(e) => handleFilterChange('sortOrder', e.target.value as 'asc' | 'desc')}
+                    className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="desc">Décroissant</option>
+                    <option value="asc">Croissant</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+      )}
 
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-6 mb-6">
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -370,24 +397,24 @@ export default function AdminProductsPage() {
                               setModalOpen(true)
                               console.log('Modal should open', product)
                             }}
-                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 p-1"
                             title="Afficher les détails"
                           >
-                            <FiEye className="w-5 h-5" />
+                            <FiEye className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => router.push(`/admin/products/${product._id}/edit`)}
-                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 p-1"
                             title="Modifier"
                           >
-                            <FiEdit2 className="w-5 h-5" />
+                            <FiEdit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(product._id)}
-                            className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                            className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 p-1"
                             title="Supprimer"
                           >
-                            <FiTrash2 className="w-5 h-5" />
+                            <FiTrash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -439,24 +466,24 @@ export default function AdminProductsPage() {
                             setModalOpen(true)
                             console.log('Modal should open', product)
                           }}
-                          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 p-1"
                           title="Afficher les détails"
                         >
-                          <FiEye className="w-5 h-5" />
+                          <FiEye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => router.push(`/admin/products/${product._id}/edit`)}
-                          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 p-1"
                           title="Modifier"
                         >
-                          <FiEdit2 className="w-5 h-5" />
+                          <FiEdit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(product._id)}
-                          className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                          className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 p-1"
                           title="Supprimer"
                         >
-                          <FiTrash2 className="w-5 h-5" />
+                          <FiTrash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -472,6 +499,29 @@ export default function AdminProductsPage() {
           </>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 gap-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+          >
+            Précédent
+          </button>
+          <span className="px-4 py-2">
+            Page {page} sur {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+          >
+            Suivant
+          </button>
+        </div>
+      )}
 
       {/* Modal */}
       {modalOpen && selectedProduct && (
