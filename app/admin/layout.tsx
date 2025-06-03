@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { FiPackage, FiList, FiSettings, FiShoppingCart, FiMenu, FiX } from 'react-icons/fi'
+import { FiPackage, FiList, FiSettings, FiShoppingCart, FiMenu, FiX, FiTag } from 'react-icons/fi'
 import { useState } from 'react'
 
 const menuItems = [
@@ -20,6 +20,11 @@ const menuItems = [
     title: 'Catégories',
     href: '/admin/categories',
     icon: FiList
+  },
+  {
+    title: 'Attributs',
+    href: '/admin/attributes',
+    icon: FiTag
   },
   {
     title: 'Paramètres',
