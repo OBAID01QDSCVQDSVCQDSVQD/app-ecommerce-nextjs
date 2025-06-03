@@ -48,6 +48,10 @@ export default function AdminProductsPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null)
+  const [editForm, setEditForm] = useState({ name: '', price: '', category: '', stock: '', description: '' })
+  const [editLoading, setEditLoading] = useState(false)
 
   useEffect(() => {
     fetchCategories()
@@ -126,6 +130,65 @@ export default function AdminProductsPage() {
     } catch (error) {
       console.error('Error deleting product:', error)
       toast.error('Échec de la suppression du produit')
+    }
+  }
+
+  const openEditModal = (product: Product) => {
+    setProductToEdit(product)
+    setEditForm({
+      name: product.name,
+      price: String(product.price ?? ''),
+      category: categories.find(c => c.name === product.category?.name)?._id || '',
+      stock: String(product.stock ?? ''),
+      description: product.description || ''
+    })
+    setEditModalOpen(true)
+  }
+
+  const handleEditChange = (field: string, value: string) => {
+    setEditForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleEditSave = async () => {
+    if (!productToEdit) return
+    setEditLoading(true)
+    try {
+      let categoryId = String(editForm.category);
+      const updatedData = {
+        ...productToEdit,
+        name: editForm.name,
+        price: parseFloat(editForm.price),
+        category: categoryId,
+        stock: parseInt(editForm.stock),
+        description: editForm.description
+      }
+      const { _id, ...dataToSend } = updatedData;
+      const res = await fetch(`/api/products/${productToEdit._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSend)
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setProducts(prev =>
+          prev.map(p =>
+            p._id === productToEdit._id
+              ? {
+                  ...updated.product,
+                  category: categories.find(c => c._id === String(updated.product.category)) || updated.product.category
+                }
+              : p
+          )
+        )
+        setEditModalOpen(false)
+        toast.success('Produit modifié avec succès')
+      } else {
+        toast.error('Erreur lors de la modification')
+      }
+    } catch {
+      toast.error('Erreur lors de la modification')
+    } finally {
+      setEditLoading(false)
     }
   }
 
@@ -403,7 +466,7 @@ export default function AdminProductsPage() {
                             <FiEye className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => router.push(`/admin/products/${product._id}/edit`)}
+                            onClick={() => openEditModal(product)}
                             className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 p-1"
                             title="Modifier"
                           >
@@ -472,7 +535,7 @@ export default function AdminProductsPage() {
                           <FiEye className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => router.push(`/admin/products/${product._id}/edit`)}
+                          onClick={() => openEditModal(product)}
                           className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 p-1"
                           title="Modifier"
                         >
@@ -526,6 +589,70 @@ export default function AdminProductsPage() {
       {/* Modal */}
       {modalOpen && selectedProduct && (
         <ProductModal product={selectedProduct} onClose={() => setModalOpen(false)} />
+      )}
+
+      {/* Edit Modal */}
+      {editModalOpen && productToEdit && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center min-h-screen py-4 backdrop-blur-sm bg-black/40" onClick={() => setEditModalOpen(false)}>
+          <div
+            className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-md mx-2 p-6 relative animate-fade-in max-h-[90vh] overflow-y-auto"
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setEditModalOpen(false)}
+              className="absolute top-3 right-3 text-gray-500 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 text-2xl font-bold focus:outline-none"
+              aria-label="Fermer"
+            >
+              &times;
+            </button>
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Modifier le Produit</h2>
+            <div className="space-y-3">
+              <input
+                className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={editForm.name}
+                onChange={e => handleEditChange('name', e.target.value)}
+                placeholder="Nom du produit"
+              />
+              <input
+                type="number"
+                className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={editForm.price}
+                onChange={e => handleEditChange('price', e.target.value)}
+                placeholder="Prix (€)"
+              />
+              <select
+                className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={editForm.category}
+                onChange={e => handleEditChange('category', e.target.value)}
+              >
+                <option value="">Sélectionner une catégorie</option>
+                {categories.map(cat => (
+                  <option key={cat._id} value={cat._id}>{cat.name}</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={editForm.stock}
+                onChange={e => handleEditChange('stock', e.target.value)}
+                placeholder="Stock"
+              />
+              <textarea
+                className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[80px]"
+                value={editForm.description}
+                onChange={e => handleEditChange('description', e.target.value)}
+                placeholder="Description"
+              />
+            </div>
+            <button
+              onClick={handleEditSave}
+              disabled={editLoading}
+              className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition disabled:opacity-60"
+            >
+              {editLoading ? 'Enregistrement...' : 'Enregistrer'}
+            </button>
+          </div>
+        </div>
       )}
 
     </div>
