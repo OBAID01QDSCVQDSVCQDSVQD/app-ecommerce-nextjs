@@ -150,43 +150,73 @@ export default function AdminProductsPage() {
   }
 
   const handleEditSave = async () => {
-    if (!productToEdit) return
+    console.log('handleEditSave called')
+    if (!productToEdit) {
+      console.log('No product to edit')
+      return
+    }
+    
     setEditLoading(true)
     try {
-      let categoryId = String(editForm.category);
+      console.log('Current form data:', editForm)
+      
+      // Prepare data with only changed fields
       const updatedData = {
-        ...productToEdit,
-        name: editForm.name,
-        price: parseFloat(editForm.price),
-        category: categoryId,
-        stock: parseInt(editForm.stock),
-        description: editForm.description
+        ...(editForm.name !== productToEdit.name && { name: editForm.name }),
+        ...(editForm.price && parseFloat(editForm.price) !== productToEdit.price && { price: parseFloat(editForm.price) }),
+        ...(editForm.category && editForm.category !== (productToEdit.category as any)?._id && { category: editForm.category }),
+        ...(editForm.stock !== undefined && { stock: editForm.stock === '' ? 0 : parseInt(editForm.stock) }),
+        ...(editForm.description !== productToEdit.description && { description: editForm.description || '' })
       }
-      const { _id, ...dataToSend } = updatedData;
+
+      // If no fields were changed, show message and return
+      if (Object.keys(updatedData).length === 0) {
+        toast.error('Aucune modification détectée')
+        setEditLoading(false)
+        return
+      }
+
+      console.log('Sending update request:', {
+        id: productToEdit._id,
+        data: updatedData
+      })
+
       const res = await fetch(`/api/products/${productToEdit._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSend)
+        body: JSON.stringify(updatedData)
       })
-      if (res.ok) {
-        const updated = await res.json()
-        setProducts(prev =>
-          prev.map(p =>
-            p._id === productToEdit._id
-              ? {
-                  ...updated.product,
-                  category: categories.find(c => c._id === String(updated.product.category)) || updated.product.category
-                }
-              : p
-          )
-        )
-        setEditModalOpen(false)
-        toast.success('Produit modifié avec succès')
-      } else {
-        toast.error('Erreur lors de la modification')
+
+      console.log('Response status:', res.status)
+      
+      if (!res.ok) {
+        const errorData = await res.json()
+        console.error('Update failed:', errorData)
+        throw new Error(errorData.error || 'Erreur lors de la modification')
       }
-    } catch {
-      toast.error('Erreur lors de la modification')
+
+      const data = await res.json()
+      console.log('Update successful:', data)
+
+      // Update local state
+      setProducts(prev =>
+        prev.map(p =>
+          p._id === productToEdit._id
+            ? {
+                ...data.product,
+                category: categories.find(c => c._id === String(data.product.category)) || data.product.category
+              }
+            : p
+        )
+      )
+
+      // Close modal and show success message
+      setEditModalOpen(false)
+      toast.success('Produit modifié avec succès')
+      
+    } catch (error) {
+      console.error('Error in handleEditSave:', error)
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de la modification')
     } finally {
       setEditLoading(false)
     }
