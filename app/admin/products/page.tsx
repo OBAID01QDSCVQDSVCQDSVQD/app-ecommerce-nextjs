@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { FiEdit2, FiTrash2, FiPlus, FiX } from 'react-icons/fi'
+import { FiEdit2, FiTrash2, FiPlus, FiX, FiEye } from 'react-icons/fi'
 import { toast } from 'react-hot-toast'
 import React from 'react'
 
@@ -45,6 +45,8 @@ export default function AdminProductsPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [categories, setCategories] = useState<{ _id: string; name: string }[]>([])
   const router = useRouter()
+  const [modalOpen, setModalOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
   useEffect(() => {
     fetchCategories()
@@ -124,6 +126,50 @@ export default function AdminProductsPage() {
       console.error('Error deleting product:', error)
       toast.error('Échec de la suppression du produit')
     }
+  }
+
+  // Modal component
+  function ProductModal({ product, onClose }: { product: Product, onClose: () => void }) {
+    return (
+      <div
+        className="fixed inset-0 z-[9999] flex items-center justify-center min-h-screen py-4 backdrop-blur-sm bg-black/30 pointer-events-auto"
+        onClick={onClose}
+      >
+        <div
+          className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-xs sm:max-w-lg mx-2 p-4 sm:p-6 relative animate-fade-in max-h-[90vh] overflow-y-auto"
+          onClick={e => e.stopPropagation()}
+        >
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 text-gray-500 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 text-2xl font-bold focus:outline-none"
+            aria-label="Fermer"
+          >
+            &times;
+          </button>
+          <div className="flex flex-col items-center gap-4">
+            <img
+              src={product.images[0] || '/placeholder.jpg'}
+              alt={product.name}
+              className="w-40 h-40 object-contain rounded-lg border bg-white dark:bg-gray-800"
+            />
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">{product.name}</h2>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Catégorie: {product.category?.name || '-'}</div>
+              <div className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-2">{product.price.toFixed(2)} €</div>
+              <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">Stock: {product.stock}</div>
+              <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">{product.description}</div>
+              {product.images.length > 1 && (
+                <div className="flex gap-2 mt-2 flex-wrap justify-center">
+                  {product.images.slice(1).map((img, i) => (
+                    <img key={i} src={img} alt="extra" className="w-14 h-14 object-contain rounded border bg-white dark:bg-gray-800" />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -270,14 +316,17 @@ export default function AdminProductsPage() {
                     <th className="px-2 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Stock
                     </th>
-                    <th className="px-2 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-2 md:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
                   {products.map((product) => (
-                    <tr key={product._id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <tr
+                      key={product._id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
                       <td className="px-2 md:px-4 py-3 align-top">
                         <div className="flex items-center">
                           {product.images[0] && (
@@ -315,6 +364,17 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="px-2 md:px-4 py-3 align-top">
                         <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              setSelectedProduct(product)
+                              setModalOpen(true)
+                              console.log('Modal should open', product)
+                            }}
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                            title="Afficher les détails"
+                          >
+                            <FiEye className="w-5 h-5" />
+                          </button>
                           <button
                             onClick={() => router.push(`/admin/products/${product._id}/edit`)}
                             className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
@@ -374,6 +434,17 @@ export default function AdminProductsPage() {
                       </div>
                       <div className="flex items-center gap-2 mt-4">
                         <button
+                          onClick={() => {
+                            setSelectedProduct(product)
+                            setModalOpen(true)
+                            console.log('Modal should open', product)
+                          }}
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                          title="Afficher les détails"
+                        >
+                          <FiEye className="w-5 h-5" />
+                        </button>
+                        <button
                           onClick={() => router.push(`/admin/products/${product._id}/edit`)}
                           className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
                           title="Modifier"
@@ -400,27 +471,13 @@ export default function AdminProductsPage() {
             </div>
           </>
         )}
-
-        <div className="flex justify-center mt-6 gap-2">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
-          >
-            Précédent
-          </button>
-          <span className="px-4 py-2">
-            Page {page} sur {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
-          >
-            Suivant
-          </button>
-        </div>
       </div>
+
+      {/* Modal */}
+      {modalOpen && selectedProduct && (
+        <ProductModal product={selectedProduct} onClose={() => setModalOpen(false)} />
+      )}
+
     </div>
   )
-} 
+}

@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { getAllAttributes } from '@/lib/db/actions/attribute.actions'
+import { FiInfo, FiImage, FiTag, FiLayers, FiList, FiSave } from 'react-icons/fi'
+import { FaBoxOpen } from 'react-icons/fa'
+import { Combobox } from '@headlessui/react'
 
 export default function CreateProductPage() {
   const router = useRouter()
@@ -36,7 +39,7 @@ export default function CreateProductPage() {
     async function fetchCategories() {
       const res = await fetch('/api/categories/list')
       const data = await res.json()
-      setCategories(data)
+      setCategories(data.categories)
     }
     fetchCategories()
   }, [])
@@ -212,173 +215,160 @@ export default function CreateProductPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Add New Product</h1>
-      <Card>
-        <CardHeader>General Info</CardHeader>
-        <CardContent className="space-y-4">
-          <Input
-            placeholder="Product Name"
-            value={name}
-            onChange={e => setName(e.target.value)}
-          />
-          <Input
-            placeholder="Slug"
-            value={slug}
-            onChange={e => setSlug(e.target.value)}
-          />
-          {/* حقل اختيار التصنيف (Autocomplete) */}
-          <div>
-            <label className="block font-medium mb-1">Category</label>
-            <Input
-              placeholder="Search category..."
-              value={categorySearch}
-              onChange={e => setCategorySearch(e.target.value)}
-              className="mb-2"
-            />
-            {categorySearch && (
-              <div className="border rounded bg-white max-h-40 overflow-y-auto">
-                {filteredCategories.length === 0 && (
-                  <div className="p-2 text-gray-400">No categories found</div>
-                )}
-                {filteredCategories.map((cat) => (
-                  <div
-                    key={cat._id}
-                    className={`p-2 cursor-pointer hover:bg-gray-100 ${category === cat._id ? 'bg-gray-200' : ''}`}
-                    onClick={() => {
-                      setCategory(cat._id)
-                      setCategorySearch(cat.name)
-                    }}
-                  >
-                    {cat.name}
-                  </div>
-                ))}
+    <div className="max-w-4xl mx-auto p-4 space-y-6">
+      <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
+        <FaBoxOpen className="text-blue-600" /> Ajouter un produit
+      </h1>
+      {/* Section: Informations générales */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-6 space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <FiInfo className="text-blue-500" />
+          <h2 className="text-xl font-semibold">Informations générales</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input placeholder="Nom du produit" value={name} onChange={e => setName(e.target.value)} />
+          <Input placeholder="Slug" value={slug} onChange={e => setSlug(e.target.value)} />
+          <Input placeholder="Marque" value={brand} onChange={e => setBrand(e.target.value)} />
+          <Input placeholder="Prix de base (€)" value={price} onChange={e => setPrice(e.target.value)} type="number" />
+          <Input placeholder="Prix affiché (€)" value={listPrice} onChange={e => setListPrice(e.target.value)} type="number" />
+          <Input placeholder="Stock" value={countInStock} onChange={e => setCountInStock(e.target.value)} type="number" />
+        </div>
+        <textarea
+          placeholder="Description"
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          className="w-full min-h-[80px] rounded border border-gray-300 dark:border-gray-700 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical text-base"
+        />
+      </div>
+      {/* Section: Images */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-6 space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <FiImage className="text-blue-500" />
+          <h2 className="text-xl font-semibold">Images du produit</h2>
+        </div>
+        <div className="flex flex-col md:flex-row gap-4 items-center">
+          <label className="w-full md:w-1/2 flex flex-col items-center px-4 py-6 bg-gray-50 dark:bg-gray-800 text-blue-600 rounded-lg shadow-md tracking-wide uppercase border border-blue-200 dark:border-gray-700 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 transition">
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12" /></svg>
+            <span className="mt-2 text-base leading-normal">Glisser-déposer ou cliquer pour télécharger</span>
+            <input type="file" accept="image/*" multiple className="hidden" onChange={async (e) => {
+              if (!e.target.files) return
+              const files = Array.from(e.target.files)
+              const urls: string[] = []
+              for (const file of files) {
+                const url = await uploadImageToCloudinary(file)
+                urls.push(url)
+              }
+              setBaseImages(urls)
+            }} />
+          </label>
+          <div className="flex gap-2 flex-wrap">
+            {baseImages.map((img, i) => (
+              img && img.trim() !== "" ? (
+                <img key={i} src={img} alt="base" className="w-20 h-20 object-contain rounded border" />
+              ) : null
+            ))}
+          </div>
+        </div>
+      </div>
+      {/* Section: Catégorie */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-6 space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <FiTag className="text-blue-500" />
+          <h2 className="text-xl font-semibold">Catégorie</h2>
+        </div>
+        <div>
+          <label className="block font-medium mb-1">Catégorie</label>
+          <select
+            value={category}
+            onChange={e => setCategory(e.target.value)}
+            className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+          >
+            <option value="">Sélectionner une catégorie</option>
+            {categories.map(cat => (
+              <option key={cat._id} value={cat._id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+      {/* Section: Attributs */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-6 space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <FiLayers className="text-blue-500" />
+          <h2 className="text-xl font-semibold">Attributs</h2>
+        </div>
+        {attributes.length === 0 ? (
+          <div className="text-gray-400">Aucun attribut disponible.</div>
+        ) : (
+          attributes.map(attr => (
+            <div key={attr._id} className="mb-2">
+              <div className="font-medium mb-1">{attr.name}</div>
+              <div className="flex flex-wrap gap-2">
+                {attr.values.map((val: any) => {
+                  const valueStr = getValueString(val)
+                  const selectedAttr = selectedAttributes.find(a => a.attributeId === attr._id)
+                  const selectedVal = selectedAttr?.values.find((v: any) => getValueString(v.value) === valueStr)
+                  return (
+                    <label key={val._id || valueStr} className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded cursor-pointer">
+                      <input
+                        type="checkbox"
+                        onChange={e => handleAttributeValueChange(attr._id, val, e.target.checked)}
+                        checked={!!selectedVal}
+                      />
+                      <span>{valueStr}</span>
+                    </label>
+                  )
+                })}
               </div>
-            )}
-          </div>
-          <Input
-            placeholder="Brand"
-            value={brand}
-            onChange={e => setBrand(e.target.value)}
-          />
-          <textarea
-            placeholder="Description"
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            className="w-full min-h-[100px] rounded border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical text-base"
-          />
-          <Input
-            placeholder="Base Price (optional)"
-            value={price}
-            onChange={e => setPrice(e.target.value)}
-          />
-          <Input
-            placeholder="List Price"
-            type="number"
-            value={listPrice}
-            onChange={e => setListPrice(e.target.value)}
-          />
-          <Input
-            placeholder="Count In Stock"
-            type="number"
-            value={countInStock}
-            onChange={e => setCountInStock(e.target.value)}
-          />
-          {/* رفع صور المنتج الأساسية */}
-          <div>
-            <h2 className="font-semibold mb-2">Product Images</h2>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={async (e) => {
-                if (!e.target.files) return
-                const files = Array.from(e.target.files)
-                const urls: string[] = []
-                for (const file of files) {
-                  const url = await uploadImageToCloudinary(file)
-                  urls.push(url)
-                }
-                setBaseImages(urls)
-              }}
-            />
-            <div className="flex gap-2 mt-2">
-              {baseImages.map((img, i) => (
-                img && img.trim() !== "" ? (
-                  <img key={i} src={img} alt="base" className="w-16 h-16 object-contain" />
-                ) : null
-              ))}
             </div>
+          ))
+        )}
+      </div>
+      {/* Section: Variantes */}
+      {variants.length > 0 && (
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-6 space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <FiList className="text-blue-500" />
+            <h2 className="text-xl font-semibold">Variantes</h2>
           </div>
-          {/* اختيار الخصائص */}
-          <div>
-            <h2 className="font-semibold mb-2">Attributes</h2>
-            {attributes.map(attr => (
-              <div key={attr._id} className="mb-2">
-                <div className="font-medium">{attr.name}</div>
-                <div className="flex flex-wrap gap-2">
-                  {attr.values.map((val: any) => {
-                    const valueStr = getValueString(val)
-                    const selectedAttr = selectedAttributes.find(a => a.attributeId === attr._id)
-                    const selectedVal = selectedAttr?.values.find((v: any) => getValueString(v.value) === valueStr)
-                    return (
-                      <div key={val._id || valueStr} className="flex flex-col items-center mr-4">
-                        <label className="flex items-center gap-1">
-                          <input
-                            type="checkbox"
-                            onChange={e => handleAttributeValueChange(attr._id, val, e.target.checked)}
-                            checked={!!selectedVal}
-                          />
-                          <span>{valueStr}</span>
-                        </label>
-                        {/* تم حذف حقول الصورة والسعر من هنا بناءً على طلب المستخدم */}
-                      </div>
-                    )
-                  })}
+          <div className="space-y-2">
+            {variants.map((variant, i) => (
+              <div key={i} className="flex flex-col md:flex-row md:items-center gap-2 border p-2 rounded">
+                <div className="flex gap-2 flex-wrap">
+                  {variant.options.map((opt: any, idx: number) => (
+                    <span key={idx} className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm">
+                      {attributes.find(a => a._id === opt.attributeId)?.name}: {getValueString(opt.value)}
+                    </span>
+                  ))}
                 </div>
+                <Input
+                  type="number"
+                  placeholder="Prix"
+                  value={variant.price}
+                  onChange={e => handleVariantPriceChange(i, e.target.value)}
+                  className="w-24"
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => handleVariantImageChange(i, e.target.files?.[0] || null)}
+                />
+                {variant.image && variant.image.trim() !== "" && (
+                  <img src={variant.image} alt="variant" className="w-12 h-12 object-contain" />
+                )}
               </div>
             ))}
           </div>
-          {/* جدول التركيبات (Variants) */}
-          {variants.length > 0 && (
-            <div>
-              <h2 className="font-semibold mb-2">Variants</h2>
-              <div className="space-y-2">
-                {variants.map((variant, i) => (
-                  <div key={i} className="flex items-center gap-4 border p-2 rounded">
-                    <div className="flex gap-2">
-                      {variant.options.map((opt: any, idx: number) => (
-                        <span key={idx} className="bg-gray-100 px-2 py-1 rounded text-sm">
-                          {attributes.find(a => a._id === opt.attributeId)?.name}: {getValueString(opt.value)}
-                        </span>
-                      ))}
-                    </div>
-                    <Input
-                      type="number"
-                      placeholder="Price"
-                      value={variant.price}
-                      onChange={e => handleVariantPriceChange(i, e.target.value)}
-                      className="w-24"
-                    />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={e => handleVariantImageChange(i, e.target.files?.[0] || null)}
-                    />
-                    {variant.image && variant.image.trim() !== "" && (
-                      <img src={variant.image} alt="variant" className="w-12 h-12 object-contain" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          <Button type="submit" className="mt-4" onClick={handleSubmit} disabled={loading}>
-            {loading ? 'Saving...' : 'Save Product'}
-          </Button>
-          {error && <div className="text-red-500 mt-2">{error}</div>}
-        </CardContent>
-      </Card>
+        </div>
+      )}
+      {/* زر الحفظ والتنبيهات */}
+      <div className="flex justify-end">
+        <Button type="submit" className="mt-4 flex items-center gap-2 px-6 py-2 text-lg" onClick={handleSubmit} disabled={loading}>
+          <FiSave /> {loading ? 'Enregistrement...' : 'Enregistrer le produit'}
+        </Button>
+      </div>
+      {error && <div className="text-red-500 mt-2 text-center">{error}</div>}
     </div>
   )
 }
