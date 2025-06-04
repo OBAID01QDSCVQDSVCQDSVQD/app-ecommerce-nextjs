@@ -29,6 +29,7 @@ const OrderSchema = new Schema({
     required: true
   },
   status: { type: String, default: 'pending' },
+  orderNumber: { type: String, required: true, unique: true },
 }, { timestamps: true })
 
 

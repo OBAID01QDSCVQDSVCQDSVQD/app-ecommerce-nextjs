@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { FiEdit2, FiTrash2, FiPlus, FiX, FiEye, FiFilter } from 'react-icons/fi'
 import { toast } from 'react-hot-toast'
 import React from 'react'
+import TiptapEditor from '@/components/TiptapEditor'
+
 
 interface Product {
   _id: string
@@ -59,12 +61,44 @@ export default function AdminProductsPage() {
   }, [page, filters])
 
   const fetchCategories = async () => {
-    try {
-      const res = await fetch('/api/categories')
-      const data = await res.json()
-      setCategories(data)
-    } catch (error) {
-      console.error('Error fetching categories:', error)
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        console.log('Fetching categories...')
+        const res = await fetch('/api/categories', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        
+        console.log('Categories response status:', res.status)
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}))
+          console.error('Categories API error:', errorData)
+          throw new Error(errorData.error || `Failed to fetch categories (${res.status})`)
+        }
+
+        const data = await res.json()
+        console.log('Categories fetched:', data)
+        
+        if (!Array.isArray(data)) {
+          console.error('Invalid categories data:', data)
+          throw new Error('Invalid categories data received')
+        }
+
+        setCategories(data)
+        return
+      } catch (error) {
+        console.error(`Error fetching categories (attempt ${4 - retries}/3):`, error)
+        retries--
+        if (retries === 0) {
+          toast.error('Failed to load categories. Please refresh the page.')
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second before retrying
+        }
+      }
     }
   }
 
@@ -140,7 +174,9 @@ export default function AdminProductsPage() {
       price: String(product.price ?? ''),
       category: categories.find(c => c.name === product.category?.name)?._id || '',
       stock: String(product.stock ?? ''),
-      description: product.description || ''
+      description: product.description && product.description.trim().startsWith('<')
+        ? product.description
+        : `<p>${product.description || ''}</p>`
     })
     setEditModalOpen(true)
   }
@@ -251,7 +287,7 @@ export default function AdminProductsPage() {
               <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Catégorie: {product.category?.name || '-'}</div>
               <div className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-2">{product.price.toFixed(2)} €</div>
               <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">Stock: {product.stock}</div>
-              <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">{product.description}</div>
+              <div className="text-sm text-gray-700 dark:text-gray-300 mb-2" dangerouslySetInnerHTML={{ __html: product.description }} />
               {product.images.length > 1 && (
                 <div className="flex gap-2 mt-2 flex-wrap justify-center">
                   {product.images.slice(1).map((img, i) => (
@@ -323,7 +359,7 @@ export default function AdminProductsPage() {
                     className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Toutes les Catégories</option>
-                    {categories.map((category) => (
+                    {(Array.isArray(categories) ? categories : []).map((category) => (
                       <option key={category._id} value={category._id}>
                         {category.name}
                       </option>
@@ -442,7 +478,7 @@ export default function AdminProductsPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-                  {products.map((product) => (
+                  {(Array.isArray(products) ? products : []).map((product) => (
                     <tr
                       key={product._id}
                       className="hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -518,7 +554,7 @@ export default function AdminProductsPage() {
             </div>
             {/* Cards for mobile */}
             <div className="sm:hidden space-y-4">
-              {products.map((product, idx) => (
+              {(Array.isArray(products) ? products : []).map((product, idx) => (
                 <React.Fragment key={product._id}>
                   <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-4 flex flex-col gap-2">
                     <div className="flex items-center gap-3">
@@ -667,12 +703,13 @@ export default function AdminProductsPage() {
                 onChange={e => handleEditChange('stock', e.target.value)}
                 placeholder="Stock"
               />
-              <textarea
-                className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[80px]"
-                value={editForm.description}
-                onChange={e => handleEditChange('description', e.target.value)}
-                placeholder="Description"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Description du produit</label>
+                <TiptapEditor
+                  content={editForm.description}
+                  onChange={value => handleEditChange('description', value)}
+                />
+              </div>
             </div>
             <button
               onClick={handleEditSave}

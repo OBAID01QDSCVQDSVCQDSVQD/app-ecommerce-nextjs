@@ -55,12 +55,26 @@ export async function createOrderWithShipping(
 
   const shippingDoc = await ShippingInfo.create(shippingData);
 
+  // Generate sequential orderNumber with year prefix
+  const currentYear = new Date().getFullYear();
+  // Find the last order by orderNumber (descending)
+  const lastOrder = await Order.findOne({}).sort({ orderNumber: -1 }).lean();
+  let nextNumber = 1;
+  if (lastOrder && (lastOrder as any).orderNumber) {
+    const match = (lastOrder as any).orderNumber.match(/^(\d{4})-(\d{5,})$/);
+    if (match) {
+      nextNumber = parseInt(match[2], 10) + 1;
+    }
+  }
+  const orderNumber = `${currentYear}-${String(nextNumber).padStart(5, '0')}`;
+
   const orderDoc = await Order.create({
     userId,
     cartItems: cartItemsWithDetails,
     totalPrice,
     shippingInfo: shippingDoc._id,
     status: "pending",
+    orderNumber,
   });
 
   return orderDoc;

@@ -121,7 +121,7 @@ export default function ProductDetailsClient({ product, relatedProducts }: { pro
           <Separator className='my-2' />
           <div className='flex flex-col gap-2'>
             <p className='p-bold-20 text-grey-600'>Description:</p>
-            <p className='p-medium-16 lg:p-regular-18'>{product.description}</p>
+            <div className='p-medium-16 lg:p-regular-18' dangerouslySetInnerHTML={{ __html: product.description }} />
           </div>
         </div>
         <div>

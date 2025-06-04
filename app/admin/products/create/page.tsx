@@ -6,9 +6,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { getAllAttributes } from '@/lib/db/actions/attribute.actions'
-import { FiInfo, FiImage, FiTag, FiLayers, FiList, FiSave } from 'react-icons/fi'
+import { FiInfo, FiImage, FiTag, FiLayers, FiSave, FiBold, FiItalic, FiList } from 'react-icons/fi'
 import { FaBoxOpen } from 'react-icons/fa'
 import { Combobox } from '@headlessui/react'
+import dynamic from 'next/dynamic'
+import TiptapEditor from '@/components/TiptapEditor'
+
+const Editor = dynamic(
+  () => import('@tinymce/tinymce-react').then(mod => mod.Editor),
+  { ssr: false }
+)
 
 export default function CreateProductPage() {
   const router = useRouter()
@@ -233,12 +240,13 @@ export default function CreateProductPage() {
           <Input placeholder="Prix affiché (€)" value={listPrice} onChange={e => setListPrice(e.target.value)} type="number" />
           <Input placeholder="Stock" value={countInStock} onChange={e => setCountInStock(e.target.value)} type="number" />
         </div>
-        <textarea
-          placeholder="Description"
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-          className="w-full min-h-[80px] rounded border border-gray-300 dark:border-gray-700 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical text-base"
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Description du produit</label>
+          <TiptapEditor
+            content={description}
+            onChange={setDescription}
+          />
+        </div>
       </div>
       {/* Section: Images */}
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-6 space-y-4">
