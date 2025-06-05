@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { FiEdit2, FiTrash2, FiPlus, FiX, FiEye, FiFilter } from 'react-icons/fi'
+import { FiEdit2, FiTrash2, FiPlus, FiX, FiEye, FiFilter, FiImage } from 'react-icons/fi'
 import { toast } from 'react-hot-toast'
 import React from 'react'
 import TiptapEditor from '@/components/TiptapEditor'
@@ -301,6 +301,8 @@ export default function AdminProductsPage() {
       </div>
     )
   }
+
+
 
   return (
     <div className="p-6 max-w-7xl mx-auto bg-gray-100 dark:bg-gray-950 min-h-screen">
@@ -706,8 +708,12 @@ export default function AdminProductsPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Description du produit</label>
                 <TiptapEditor
+                  key={editForm.description}
                   content={editForm.description}
-                  onChange={value => handleEditChange('description', value)}
+                  onChange={value => {
+                    console.log('Tiptap onChange:', value)
+                    handleEditChange('description', value)
+                  }}
                 />
               </div>
             </div>

@@ -36,6 +36,10 @@ export default function CreateProductPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const prevSlugFromNameRef = useRef('')
+  const [loadingAI, setLoadingAI] = useState(false)
+  const [aiImages, setAIImages] = useState<File[]>([])
+  const [aiPrompt, setAIPrompt] = useState('Écris une description commerciale pour ce produit')
+  const [aiRawResult, setAiRawResult] = useState('')
 
   useEffect(() => {
     async function fetchAttributes() {
@@ -221,6 +225,46 @@ export default function CreateProductPage() {
     }
   }
 
+  async function uploadImages(files: File[]) {
+    const urls: string[] = [];
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'ecommerce-app');
+      const res = await fetch('https://api.cloudinary.com/v1_1/dwio60ll1/image/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      urls.push(data.secure_url);
+    }
+    return urls;
+  }
+
+  async function generateDescriptionAI() {
+    if (!aiImages.length || !aiPrompt) return;
+    setLoadingAI(true)
+    try {
+      const imageUrls = await uploadImages(aiImages);
+      const res = await fetch('/api/ai-generate-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          features: aiPrompt,
+          images: imageUrls
+        }),
+      })
+      const data = await res.json()
+      setAiRawResult(data.description || '')
+      setDescription(data.description || '')
+    } catch (err) {
+      alert('Erreur lors de la génération de la description !')
+    } finally {
+      setLoadingAI(false)
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
       <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
@@ -242,6 +286,37 @@ export default function CreateProductPage() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Description du produit</label>
+          {/* AI Description Generator */}
+          <div className="flex flex-col gap-2 mb-2">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={e => setAIImages(Array.from(e.target.files || []))}
+            />
+            <input
+              type="text"
+              placeholder="Prompt pour l'IA (ex: Écris une description commerciale pour ce produit)"
+              value={aiPrompt}
+              onChange={e => setAIPrompt(e.target.value)}
+              className="border rounded px-2 py-1 w-full"
+            />
+            <Button
+              type="button"
+              onClick={generateDescriptionAI}
+              disabled={loadingAI || !aiImages.length || !aiPrompt}
+            >
+              {loadingAI ? 'Génération...' : 'Générer une description avec IA (images + texte)'}
+            </Button>
+            {/* Debug: Show generated description in a plain textarea */}
+            <textarea
+              value={description}
+              readOnly
+              rows={5}
+              className="w-full border border-gray-300 rounded mt-2 p-2 text-gray-800"
+              placeholder="Description générée apparaîtra ici..."
+            />
+          </div>
           <TiptapEditor
             content={description}
             onChange={setDescription}
