@@ -39,10 +39,6 @@ const ProductCard = ({
               fill
               sizes='80vw'
               className='object-contain'
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = '/placeholder.jpg';
-              }}
             />
           </div>
         ) : (

@@ -7,119 +7,201 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import useCartStore from '@/hooks/use-cart-store'
 import { useRouter } from 'next/navigation'
+import { toast } from 'react-hot-toast'
 
 export default function CheckoutPage() {
   const {
     cart: { items, itemsPrice },
+    clearCart,
   } = useCartStore()
 
   const router = useRouter()
 
   const [formData, setFormData] = useState({
-    fullName: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
-    country: '',
+    address: '',
     city: '',
-    state: '',
-    zipCode: '',
+    postalCode: '',
+    country: '',
   })
 
-  const handleOrder = async () => {
+  // متغير التحقق من اكتمال الحقول الإلزامية
+  const isFormValid =
+    formData.firstName.trim() &&
+    formData.lastName.trim() &&
+    formData.phone.trim() &&
+    formData.address.trim();
+
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Form submitted!');
+    setLoading(true);
+    // تحقق من اكتمال الحقول الإلزامية
+    if (
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.phone ||
+      !formData.address
+    ) {
+      toast.error('Veuillez remplir tous les champs obligatoires : Prénom, Nom, Téléphone, Adresse.');
+      setLoading(false);
+      return;
+    }
+    // اطبع بيانات الشحن المرسلة
+    const shippingDataToSend = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      phone: formData.phone,
+      email: formData.email,
+      address: formData.address,
+      city: formData.city,
+      postalCode: formData.postalCode,
+      country: formData.country,
+    };
+    console.log('Shipping data sent:', shippingDataToSend);
+    console.log('Cart items with attributes:', JSON.stringify(items.map(item => ({
+      name: item.name,
+      attributes: (item as any).attributes
+    })), null, 2));
+    console.log({
+      shippingData: shippingDataToSend,
+      cartItems: items,
+      totalPrice: itemsPrice,
+    });
     try {
-      const res = await fetch('/api/checkout', {
+      const response = await fetch('/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          shippingData: {
-            firstName: formData.fullName,
-            lastName: '',
-            phone: formData.phone,
-            email: formData.email,
-            address: `${formData.state}, ${formData.zipCode}`,
-            city: formData.city,
-            postalCode: formData.zipCode,
-            country: formData.country,
-          },
+          shippingData: shippingDataToSend,
           cartItems: items,
           totalPrice: itemsPrice,
-          userId: null,
         }),
-      })
+      });
 
-      if (!res.ok) throw new Error('Checkout failed')
+      let data = null;
+      const text = await response.text();
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (e) {
+        data = {};
+      }
 
-      const result = await res.json()
-      const orderId = result.order._id
-      router.push(`/thank-you?orderId=${orderId}`)
-    } catch (err) {
-      console.error('Checkout error:', err)
-      alert('❌ Failed to place order.')
+      if (!response.ok) {
+        // اطبع رسالة الخطأ القادمة من السيرفر
+        console.log('API error:', data);
+        // معالجة أخطاء الستوك
+        if (data.error && data.error.includes('STOCK_ERROR')) {
+          const stockError = JSON.parse(data.error);
+          const errorMessages = stockError.items.map((item: any) => 
+            `${item.name} : Stock insuffisant. Disponible : ${item.message.match(/\d+/)}`
+          ).join('\n');
+          toast.error(errorMessages);
+        } else {
+          toast.error(data.error || 'Une erreur est survenue lors de la commande.');
+        }
+        return;
+      }
+
+      // نجاح الطلب
+      toast.success('Votre commande a été créée avec succès !');
+      clearCart();
+      router.push('/thank-you');
+    } catch (error) {
+      console.error('Error creating order:', error);
+      toast.error('Une erreur est survenue lors de la création de la commande');
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   console.log('checkout items:', items)
+  console.log('cartItemsWithDetails:', items)
+  console.log('isFormValid:', isFormValid);
 
   return (
     <div className="max-w-7xl mx-auto p-4 grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="md:col-span-2 space-y-6">
-        <h1 className="text-2xl font-bold">Checkout</h1>
+      <form onSubmit={handleSubmit} className="md:col-span-2 space-y-6">
+        <h1 className="text-2xl font-bold">Paiement</h1>
         <Card>
-          <CardHeader className="text-lg font-semibold">Shipping Information</CardHeader>
+          <CardHeader className="text-lg font-semibold">Informations de livraison</CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              placeholder="Full Name"
-              name="fullName"
-              value={formData.fullName}
+              placeholder="Prénom"
+              name="firstName"
+              value={formData.firstName}
               onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+              required
             />
             <Input
-              placeholder="Email Address"
+              placeholder="Nom"
+              name="lastName"
+              value={formData.lastName}
+              onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+              required
+            />
+            <Input
+              placeholder="Adresse e-mail"
               name="email"
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+              required
             />
             <Input
-              placeholder="Phone Number"
+              placeholder="Numéro de téléphone"
               name="phone"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+              required
             />
             <Input
-              placeholder="Country"
-              name="country"
-              value={formData.country}
+              placeholder="Adresse"
+              name="address"
+              value={formData.address}
               onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+              required
             />
             <Input
-              placeholder="City"
+              placeholder="Ville"
               name="city"
               value={formData.city}
               onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
             />
             <Input
-              placeholder="State"
-              name="state"
-              value={formData.state}
+              placeholder="Code postal"
+              name="postalCode"
+              value={formData.postalCode}
               onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
             />
             <Input
-              placeholder="ZIP Code"
-              name="zipCode"
-              value={formData.zipCode}
+              placeholder="Pays"
+              name="country"
+              value={formData.country}
               onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
             />
-            <div className="md:col-span-2">
-              <label className="flex gap-2 items-start text-sm">
-                <input type="checkbox" /> I agree to the Terms and Conditions.
-              </label>
-            </div>
           </CardContent>
         </Card>
-      </div>
+        <Button
+          className="w-full rounded-full text-white bg-orange-500 hover:bg-orange-600 mt-2"
+          type="submit"
+          disabled={loading || !isFormValid}
+        >
+          Commander
+        </Button>
+        {!isFormValid && (
+          <div className="text-red-500 text-center mt-2 text-sm">
+            Veuillez remplir tous les champs obligatoires : Prénom, Nom, Téléphone, Adresse.
+          </div>
+        )}
+      </form>
 
       <div className="space-y-6">
         <Card>
@@ -172,12 +254,6 @@ export default function CheckoutPage() {
           </CardContent>
         </Card>
 
-        <Button
-          className="w-full rounded-full text-white bg-blue-600 hover:bg-blue-700"
-          onClick={handleOrder}
-        >
-          Order Now
-        </Button>
         <div className="text-sm text-gray-500 text-center">
           🔒 Secure Checkout - SSL Encrypted
         </div>

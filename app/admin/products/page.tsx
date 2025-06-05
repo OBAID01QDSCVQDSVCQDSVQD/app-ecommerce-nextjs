@@ -19,6 +19,21 @@ interface Product {
   stock: number
   images: string[]
   createdAt: string
+  variants?: Array<{
+    options: Array<{
+      attributeId?: string
+      attribute?: string
+      value?: string
+    }>
+    stock?: number
+    price?: number
+  }>
+  attributes?: Array<{
+    attribute?: {
+      _id: string
+    }
+    value: string
+  }>
 }
 
 interface Filters {
@@ -52,7 +67,14 @@ export default function AdminProductsPage() {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [productToEdit, setProductToEdit] = useState<Product | null>(null)
-  const [editForm, setEditForm] = useState({ name: '', price: '', category: '', stock: '', description: '' })
+  const [editForm, setEditForm] = useState({ 
+    name: '', 
+    price: '', 
+    category: '', 
+    stock: '', 
+    description: '',
+    variants: [] as any[]
+  })
   const [editLoading, setEditLoading] = useState(false)
 
   useEffect(() => {
@@ -176,13 +198,35 @@ export default function AdminProductsPage() {
       stock: String(product.stock ?? ''),
       description: product.description && product.description.trim().startsWith('<')
         ? product.description
-        : `<p>${product.description || ''}</p>`
+        : `<p>${product.description || ''}</p>`,
+      variants: product.variants || []
     })
     setEditModalOpen(true)
   }
 
-  const handleEditChange = (field: string, value: string) => {
-    setEditForm(prev => ({ ...prev, [field]: value }))
+  const handleEditChange = (field: string, value: string | number, variantIndex?: number) => {
+    console.log('handleEditChange called:', { field, value, variantIndex })
+    
+    if (variantIndex !== undefined && field === 'variantStock') {
+      setEditForm(prev => {
+        const newVariants = [...prev.variants]
+        newVariants[variantIndex] = {
+          ...newVariants[variantIndex],
+          stock: Number(value) || 0
+        }
+        console.log('Updated variants:', newVariants)
+        return {
+          ...prev,
+          variants: newVariants
+        }
+      })
+    } else {
+      setEditForm(prev => {
+        const newForm = { ...prev, [field]: value }
+        console.log('Updated form:', newForm)
+        return newForm
+      })
+    }
   }
 
   const handleEditSave = async () => {
@@ -195,27 +239,33 @@ export default function AdminProductsPage() {
     setEditLoading(true)
     try {
       console.log('Current form data:', editForm)
+      console.log('Original product:', productToEdit)
       
       // Prepare data with only changed fields
-      const updatedData = {
-        ...(editForm.name !== productToEdit.name && { name: editForm.name }),
-        ...(editForm.price && parseFloat(editForm.price) !== productToEdit.price && { price: parseFloat(editForm.price) }),
-        ...(editForm.category && editForm.category !== (productToEdit.category as any)?._id && { category: editForm.category }),
-        ...(editForm.stock !== undefined && { stock: editForm.stock === '' ? 0 : parseInt(editForm.stock) }),
-        ...(editForm.description !== productToEdit.description && { description: editForm.description || '' })
+      const updatedData: any = {
+        name: editForm.name,
+        price: parseFloat(editForm.price),
+        category: editForm.category,
+        description: editForm.description || ''
       }
 
-      // If no fields were changed, show message and return
-      if (Object.keys(updatedData).length === 0) {
-        toast.error('Aucune modification détectée')
-        setEditLoading(false)
-        return
+      // Handle stock updates
+      if (editForm.variants && editForm.variants.length > 0) {
+        // For products with variants, update variant stocks
+        console.log('Updating variants stock')
+        updatedData.variants = editForm.variants.map((variant) => ({
+          ...variant,
+          stock: Number(variant.stock) || 0
+        }))
+        console.log('Updated variants:', updatedData.variants)
+      } else {
+        // For products without variants, update main stock
+        console.log('Updating main stock')
+        updatedData.stock = Number(editForm.stock) || 0
+        console.log('Updated main stock:', updatedData.stock)
       }
 
-      console.log('Sending update request:', {
-        id: productToEdit._id,
-        data: updatedData
-      })
+      console.log('Final update data:', updatedData)
 
       const res = await fetch(`/api/products/${productToEdit._id}`, {
         method: 'PUT',
@@ -258,8 +308,25 @@ export default function AdminProductsPage() {
     }
   }
 
+  // Helper function to get attribute name
+  const getAttributeName = (id: string, product: any) => {
+    if (!product.attributes) return id
+    const found = product.attributes.find((a: any) => (a.attribute?._id || a.attribute) == id)
+    return found ? found.value : id
+  }
+
   // Modal component
-  function ProductModal({ product, onClose }: { product: Product, onClose: () => void }) {
+  function ProductModal({ product, onClose }: { product: any, onClose: () => void }) {
+    // Helper to check if product has variants with stock
+    const hasVariants = Array.isArray(product.variants) && product.variants.length > 0 && product.variants.some((v: any) => v.stock !== undefined)
+
+    // Helper to get attribute name by id
+    const getAttributeName = (id: string) => {
+      if (!product.attributes) return id
+      const found = product.attributes.find((a: any) => (a.attribute?._id || a.attribute) == id)
+      return found ? found.value : id
+    }
+
     return (
       <div
         className="fixed inset-0 z-[9999] flex items-center justify-center min-h-screen py-4 backdrop-blur-sm bg-black/30 pointer-events-auto"
@@ -285,12 +352,46 @@ export default function AdminProductsPage() {
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">{product.name}</h2>
               <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Catégorie: {product.category?.name || '-'}</div>
-              <div className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-2">{product.price.toFixed(2)} €</div>
-              <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">Stock: {product.stock}</div>
+              
+              {/* Price and Stock Display */}
+              {!hasVariants ? (
+                <>
+                  <div className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-2">
+                    Prix: {product.price.toFixed(2)} €
+                  </div>
+                  <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                    Stock: {product.countInStock ?? product.stock ?? 0}
+                  </div>
+                </>
+              ) : (
+                <div className="text-sm text-gray-700 dark:text-gray-300 mb-2 text-left">
+                  <div className="font-semibold mb-1">Variantes:</div>
+                  <ul className="space-y-2">
+                    {product.variants.map((variant: any, i: number) => (
+                      <li key={i} className="border-b border-gray-200 dark:border-gray-800 pb-2 last:border-b-0">
+                        <div className="flex flex-col gap-1">
+                          <div className="font-medium">
+                            {variant.options && Array.isArray(variant.options)
+                              ? variant.options.map((opt: any) => getAttributeName(opt.attributeId || opt.attribute)).join(' / ')
+                              : ''}
+                          </div>
+                          <div className="text-green-700 dark:text-green-300 font-bold">
+                            Prix: {variant.price !== undefined ? variant.price.toFixed(2) : product.price.toFixed(2)} €
+                          </div>
+                          <div className="text-blue-700 dark:text-blue-300 font-bold">
+                            Stock: {variant.stock ?? 0}
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               <div className="text-sm text-gray-700 dark:text-gray-300 mb-2" dangerouslySetInnerHTML={{ __html: product.description }} />
               {product.images.length > 1 && (
                 <div className="flex gap-2 mt-2 flex-wrap justify-center">
-                  {product.images.slice(1).map((img, i) => (
+                  {product.images.slice(1).map((img: any, i: number) => (
                     <img key={i} src={img} alt="extra" className="w-14 h-14 object-contain rounded border bg-white dark:bg-gray-800" />
                   ))}
                 </div>
@@ -674,37 +775,80 @@ export default function AdminProductsPage() {
               &times;
             </button>
             <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Modifier le Produit</h2>
-            <div className="space-y-3">
-              <input
-                className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={editForm.name}
-                onChange={e => handleEditChange('name', e.target.value)}
-                placeholder="Nom du produit"
-              />
-              <input
-                type="number"
-                className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={editForm.price}
-                onChange={e => handleEditChange('price', e.target.value)}
-                placeholder="Prix (€)"
-              />
-              <select
-                className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={editForm.category}
-                onChange={e => handleEditChange('category', e.target.value)}
-              >
-                <option value="">Sélectionner une catégorie</option>
-                {categories.map(cat => (
-                  <option key={cat._id} value={cat._id}>{cat.name}</option>
-                ))}
-              </select>
-              <input
-                type="number"
-                className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={editForm.stock}
-                onChange={e => handleEditChange('stock', e.target.value)}
-                placeholder="Stock"
-              />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Nom du produit</label>
+                <input
+                  className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={editForm.name}
+                  onChange={e => handleEditChange('name', e.target.value)}
+                  placeholder="Nom du produit"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Prix principal</label>
+                <input
+                  type="number"
+                  className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={editForm.price}
+                  onChange={e => handleEditChange('price', e.target.value)}
+                  placeholder="Prix (€)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Catégorie</label>
+                <select
+                  className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={editForm.category}
+                  onChange={e => handleEditChange('category', e.target.value)}
+                >
+                  <option value="">Sélectionner une catégorie</option>
+                  {categories.map(cat => (
+                    <option key={cat._id} value={cat._id}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Stock and Variants Section */}
+              {editForm.variants && editForm.variants.length > 0 ? (
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">Stock des variantes</h3>
+                  {editForm.variants.map((variant, index) => (
+                    <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                      <div className="font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {variant.options && Array.isArray(variant.options)
+                          ? variant.options.map((opt: any) => getAttributeName(opt.attributeId || opt.attribute, productToEdit)).join(' / ')
+                          : ''}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm text-gray-600 dark:text-gray-400">Stock:</label>
+                        <input
+                          type="number"
+                          className="flex-1 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          value={variant.stock ?? 0}
+                          onChange={e => handleEditChange('variantStock', e.target.value, index)}
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Stock principal</label>
+                  <input
+                    type="number"
+                    className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={editForm.stock}
+                    onChange={e => handleEditChange('stock', e.target.value)}
+                    placeholder="Stock"
+                    min="0"
+                  />
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Description du produit</label>
                 <TiptapEditor

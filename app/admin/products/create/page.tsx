@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { getAllAttributes } from '@/lib/db/actions/attribute.actions'
-import { FiInfo, FiImage, FiTag, FiLayers, FiSave, FiBold, FiItalic, FiList } from 'react-icons/fi'
+import { FiInfo, FiImage, FiTag, FiLayers, FiSave, FiBold, FiItalic, FiList, FiCopy } from 'react-icons/fi'
 import { FaBoxOpen } from 'react-icons/fa'
 import { Combobox } from '@headlessui/react'
 import dynamic from 'next/dynamic'
 import TiptapEditor from '@/components/TiptapEditor'
+import { toast } from 'react-hot-toast'
 
 const Editor = dynamic(
   () => import('@tinymce/tinymce-react').then(mod => mod.Editor),
@@ -107,6 +108,13 @@ export default function CreateProductPage() {
     setVariants(newVariants)
   }
 
+  // Handle stock for each variant
+  const handleVariantStockChange = (index: number, value: string) => {
+    const newVariants = [...variants]
+    newVariants[index].stock = value
+    setVariants(newVariants)
+  }
+
   // Helper to get value as string
   const getValueString = (val: any) => typeof val === 'object' && val !== null ? val.label || val.value || '' : val || ''
 
@@ -174,9 +182,11 @@ export default function CreateProductPage() {
     }
   }, [name, slug])
 
-  const handleSubmit = async () => {
-    setLoading(true)
-    setError(null)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Submit button clicked');
+    setLoading(true);
+    setError(null);
     try {
       const attributesForDb = selectedAttributes.flatMap(attr =>
         attr.values.map(valObj => ({
@@ -194,10 +204,10 @@ export default function CreateProductPage() {
         description,
         price: parseFloat(price) || 0,
         listPrice: parseFloat(listPrice) || 0,
-        countInStock: parseInt(countInStock) || 0,
+        countInStock: variants.length === 0 ? parseInt(countInStock) || 0 : 0, // ignore main stock if variants
         images: baseImages,
         attributes: attributesForDb,
-        variants,
+        variants: variants.length > 0 ? variants.map(v => ({ ...v, stock: parseInt(v.stock) || 0 })) : [],
         isPublished: true,
         avgRating: 0,
         numReviews: 0,
@@ -282,7 +292,49 @@ export default function CreateProductPage() {
           <Input placeholder="Marque" value={brand} onChange={e => setBrand(e.target.value)} />
           <Input placeholder="Prix de base (€)" value={price} onChange={e => setPrice(e.target.value)} type="number" />
           <Input placeholder="Prix affiché (€)" value={listPrice} onChange={e => setListPrice(e.target.value)} type="number" />
-          <Input placeholder="Stock" value={countInStock} onChange={e => setCountInStock(e.target.value)} type="number" />
+          {/* Stock logic: show main stock if no variants, else show variant stock table */}
+          {variants.length === 0 ? (
+            <Input
+              placeholder="Stock"
+              value={countInStock}
+              onChange={e => setCountInStock(e.target.value)}
+              type="number"
+            />
+          ) : (
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Stock par variante</label>
+              <div className="overflow-x-auto">
+                <table className="min-w-full border text-sm">
+                  <thead>
+                    <tr className="bg-gray-100 dark:bg-gray-800">
+                      <th className="border px-2 py-1">#</th>
+                      <th className="border px-2 py-1">Attributs</th>
+                      <th className="border px-2 py-1">Stock</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {variants.map((variant, i) => (
+                      <tr key={i}>
+                        <td className="border px-2 py-1">{i + 1}</td>
+                        <td className="border px-2 py-1">
+                          {variant.options.map((opt: any) => `${opt.attributeId}: ${opt.value}`).join(', ')}
+                        </td>
+                        <td className="border px-2 py-1">
+                          <input
+                            type="number"
+                            className="w-24 border rounded px-2 py-1"
+                            value={variant.stock || ''}
+                            onChange={e => handleVariantStockChange(i, e.target.value)}
+                            min={0}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Description du produit</label>
@@ -308,14 +360,33 @@ export default function CreateProductPage() {
             >
               {loadingAI ? 'Génération...' : 'Générer une description avec IA (images + texte)'}
             </Button>
-            {/* Debug: Show generated description in a plain textarea */}
-            <textarea
-              value={description}
-              readOnly
-              rows={5}
-              className="w-full border border-gray-300 rounded mt-2 p-2 text-gray-800"
-              placeholder="Description générée apparaîtra ici..."
-            />
+            {/* Debug: Show generated description in a plain textarea with a floating copy button */}
+            <div className="relative mt-2">
+              <textarea
+                value={description}
+                readOnly
+                rows={5}
+                className="w-full border border-gray-300 rounded p-2 text-gray-800 pr-16 bg-gray-50"
+                placeholder="Description générée apparaîtra ici..."
+                style={{ resize: 'vertical', minHeight: 80 }}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (description) {
+                    navigator.clipboard.writeText(description)
+                    toast.success('تم نسخ النص!')
+                  }
+                }}
+                className="absolute top-2 right-2 px-2 py-1 text-xs bg-white border border-gray-300 rounded shadow hover:bg-gray-100 flex items-center gap-1 text-gray-700 transition"
+                title="نسخ النص"
+                disabled={!description}
+                style={{ zIndex: 10 }}
+              >
+                <FiCopy className="w-4 h-4" />
+                <span>Copier</span>
+              </button>
+            </div>
           </div>
           <TiptapEditor
             content={description}
@@ -425,13 +496,24 @@ export default function CreateProductPage() {
                     </span>
                   ))}
                 </div>
-                <Input
-                  type="number"
-                  placeholder="Prix"
-                  value={variant.price}
-                  onChange={e => handleVariantPriceChange(i, e.target.value)}
-                  className="w-24"
-                />
+                {/* Price and Stock side by side */}
+                <div className="flex gap-2 items-center">
+                  <Input
+                    type="number"
+                    placeholder="Prix"
+                    value={variant.price}
+                    onChange={e => handleVariantPriceChange(i, e.target.value)}
+                    className="w-24"
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Stock"
+                    value={variant.stock || ''}
+                    onChange={e => handleVariantStockChange(i, e.target.value)}
+                    className="w-24"
+                    min={0}
+                  />
+                </div>
                 <input
                   type="file"
                   accept="image/*"

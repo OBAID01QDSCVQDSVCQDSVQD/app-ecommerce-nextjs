@@ -11,6 +11,10 @@ import AddToBrowsingHistory from '@/components/shared/product/add-to-browsing-hi
 import AddToCart from '@/components/shared/product/add-to-cart';
 import { generateId, round2 } from '@/lib/utils';
 
+// نصوص فرنسية
+const STOCK_TEXT = 'Stock disponible :';
+const OUT_OF_STOCK_TEXT = 'Rupture de stock';
+
 export default function ProductDetailsClient({ product, relatedProducts }: { product: any, relatedProducts: any[] }) {
   // Group attributes by name
   const grouped: Record<string, string[]> = {};
@@ -52,6 +56,9 @@ export default function ProductDetailsClient({ product, relatedProducts }: { pro
       })
     );
   }, [selected, product]);
+
+  // الكمية المتوفرة للفاريونت المطابق
+  const availableStock = selectedVariant ? selectedVariant.stock : 0;
 
   // Merge product images with selected attribute images (if any)
   const galleryImages = useMemo(() => {
@@ -128,18 +135,17 @@ export default function ProductDetailsClient({ product, relatedProducts }: { pro
           <Card>
             <CardContent className='p-4 flex flex-col gap-4'>
               <ProductPrice price={displayPrice} />
-              {product.countInStock > 0 && product.countInStock <= 3 && (
-                <div className='text-destructive font-bold'>
-                  {`Only ${product.countInStock} left in stock - order soon`}
-                </div>
-              )}
-              {product.countInStock !== 0 ? (
-                <div className='text-green-700 text-xl'>In Stock</div>
-              ) : (
-                <div className='text-destructive text-xl'>Out of Stock</div>
+              {allAttributesSelected && (
+                availableStock > 0 ? (
+                  <div className='text-green-700 text-xl'>
+                    {`${STOCK_TEXT} ${availableStock}`}
+                  </div>
+                ) : (
+                  <div className='text-destructive text-xl'>{OUT_OF_STOCK_TEXT}</div>
+                )
               )}
             </CardContent>
-            {product.countInStock !== 0 && (
+            {allAttributesSelected && availableStock > 0 && (
               <div className='flex justify-center items-center'>
                 <AddToCart
                   item={{
@@ -151,10 +157,10 @@ export default function ProductDetailsClient({ product, relatedProducts }: { pro
                     price: round2(displayPrice),
                     quantity: 1,
                     image: galleryImages[0],
-                    countInStock: product.countInStock,
+                    countInStock: availableStock,
                     attributes: Object.entries(selected).map(([attribute, value]) => ({ attribute, value })),
                   }}
-                  disabled={!allAttributesSelected}
+                  disabled={!allAttributesSelected || availableStock === 0}
                 />
               </div>
             )}

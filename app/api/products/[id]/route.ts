@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { updateProduct } from '@/lib/actions/product.actions'
+import { updateProduct } from '@/lib/db/actions/product.actions'
 import Product from '@/lib/db/models/product.model'
 
 export async function PUT(
@@ -20,14 +20,25 @@ export async function PUT(
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
 
-    // Prepare update data with only changed fields
-    const updateData = {
+    // Prepare update data
+    const updateData: any = {
       _id: id,
-      ...(data.name && { name: data.name }),
-      ...(data.price && { price: parseFloat(data.price) }),
-      ...(data.category && { category: data.category }),
-      ...(data.description !== undefined && { description: data.description || '' }),
-      ...(data.stock !== undefined && { stock: parseInt(data.stock) })
+      name: data.name,
+      price: parseFloat(data.price),
+      category: data.category,
+      description: data.description || ''
+    }
+
+    // Handle stock updates
+    if (data.variants && Array.isArray(data.variants)) {
+      // Update variants with their stocks
+      updateData.variants = data.variants.map((variant: any) => ({
+        ...variant,
+        stock: Number(variant.stock) || 0
+      }))
+    } else if (data.stock !== undefined) {
+      // Update main stock if no variants
+      updateData.stock = Number(data.stock) || 0
     }
 
     console.log('Sending to updateProduct:', updateData)

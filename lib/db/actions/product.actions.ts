@@ -33,3 +33,32 @@ export async function createProduct(data: any) {
   await newProduct.save()
   return JSON.parse(JSON.stringify(newProduct))
 }
+
+export async function updateProduct(data: any) {
+  try {
+    await connectToDatabase()
+    
+    // If updating variants, calculate total stock
+    if (data.variants && Array.isArray(data.variants)) {
+      const totalStock = data.variants.reduce((sum: number, variant: any) => sum + (Number(variant.stock) || 0), 0)
+      data.countInStock = totalStock
+    } else if (data.stock !== undefined) {
+      data.countInStock = Number(data.stock) || 0
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      data._id,
+      { $set: data },
+      { new: true }
+    ).populate('category', 'name')
+
+    if (!updatedProduct) {
+      return { success: false, message: 'Product not found' }
+    }
+
+    return { success: true, product: updatedProduct }
+  } catch (error) {
+    console.error('Error updating product:', error)
+    return { success: false, message: 'Failed to update product' }
+  }
+}

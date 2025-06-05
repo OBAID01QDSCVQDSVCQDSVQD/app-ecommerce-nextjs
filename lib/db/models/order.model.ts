@@ -20,6 +20,10 @@ const OrderSchema = new Schema({
           value: String
         }
       ],
+      variantId: { type: Schema.Types.ObjectId },
+      variantPrice: Number,
+      variantStock: Number,
+      variantOptions: [Object],
     },
 
   ],
