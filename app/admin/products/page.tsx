@@ -27,6 +27,7 @@ interface Product {
     }>
     stock?: number
     price?: number
+    numSales?: number
   }>
   attributes?: Array<{
     attribute?: {
@@ -34,6 +35,7 @@ interface Product {
     }
     value: string
   }>
+  numSales?: number
 }
 
 interface Filters {
@@ -76,6 +78,7 @@ export default function AdminProductsPage() {
     variants: [] as any[]
   })
   const [editLoading, setEditLoading] = useState(false)
+  const [lowStockModalOpen, setLowStockModalOpen] = useState(false)
 
   useEffect(() => {
     fetchCategories()
@@ -403,10 +406,100 @@ export default function AdminProductsPage() {
     )
   }
 
+  // --- قسم المنتجات المميزة (منطق الستوك الذكي) ---
+  function getLowStockVariants(product: Product) {
+    if (product.variants && product.variants.length > 0) {
+      // أرجع كل الفاريونتات التي ستوكها أقل من 5
+      return product.variants
+        .filter(v => typeof v.stock === 'number' && v.stock < 5)
+        .map(v => ({
+          variant: v,
+          attributes: v.options?.map(opt => opt.value).filter(Boolean).join(' / ') || '',
+          stock: v.stock ?? 0
+        }))
+    } else if (typeof product.stock === 'number' && product.stock < 5) {
+      // منتج بدون فاريونت وستوكه أقل من 5
+      return [{ variant: null, attributes: '', stock: product.stock }]
+    }
+    return []
+  }
+  const lowStockList = products.flatMap(p => getLowStockVariants(p).map(v => ({ product: p, ...v })));
 
+  // --- قسم المنتجات المميزة ---
+  const bestSellers = [...products].sort((a, b) => {
+    const aVariantSales = a.variants?.reduce((sum, v) => sum + (v.numSales || 0), 0) || 0;
+    const bVariantSales = b.variants?.reduce((sum, v) => sum + (v.numSales || 0), 0) || 0;
+    return bVariantSales - aVariantSales || (b.numSales || 0) - (a.numSales || 0);
+  }).slice(0, 5);
+  const zeroSales = products.filter(p => {
+    const variantSales = p.variants?.reduce((sum, v) => sum + (v.numSales || 0), 0) || 0;
+    return variantSales === 0 && (p.numSales || 0) === 0;
+  });
 
   return (
-    <div className="p-6 max-w-7xl mx-auto bg-gray-100 dark:bg-gray-950 min-h-screen">
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-8 text-primary dark:text-yellow-400">Gestion des produits</h1>
+      {/* قسم المنتجات */}
+      <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* المنتجات التي قربت تخلص */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-4 flex flex-col items-center border-l-4 border-yellow-400">
+          <div className="text-3xl mb-2">🕵️‍♂️</div>
+          <div className="font-bold text-lg mb-1">Produits presque épuisés</div>
+          <div className="text-sm text-gray-500 mb-2">Stock &lt; 5</div>
+          <ul className="text-sm text-gray-700 dark:text-gray-200 max-h-32 overflow-y-auto w-full">
+            {lowStockList.length === 0 ? <li>Aucun produit</li> : lowStockList.slice(0, 5).map((item, i) => (
+              <li key={item.product._id + '-' + i}>
+                {item.product.name}
+                {item.attributes && <span className="ml-1 text-xs text-gray-500">[{item.attributes}]</span>}
+                <span className="text-xs text-red-500 ml-2">({item.stock})</span>
+              </li>
+            ))}
+          </ul>
+          {lowStockList.length > 5 && (
+            <button onClick={() => setLowStockModalOpen(true)} className="mt-2 text-blue-600 hover:underline text-sm font-semibold">Voir tout</button>
+          )}
+        </div>
+        {/* الأكثر مبيعًا */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-4 flex flex-col items-center border-l-4 border-orange-500">
+          <div className="text-3xl mb-2">🔥</div>
+          <div className="font-bold text-lg mb-1">Meilleures ventes</div>
+          <div className="text-sm text-gray-500 mb-2">Top 5</div>
+          <ul className="text-sm text-gray-700 dark:text-gray-200 max-h-32 overflow-y-auto w-full">
+            {bestSellers.length === 0 ? (
+              <li>Aucun produit</li>
+            ) : (
+              bestSellers.map(p => (
+                <li key={p._id}>
+                  {p.name}
+                  {p.variants && p.variants.filter(v => !!v.numSales && v.numSales > 0).length > 0 ? (
+                    p.variants
+                      .filter(v => !!v.numSales && v.numSales > 0)
+                      .map((v, i) => (
+                        <div key={i} className="ml-1 text-xs text-orange-500">
+                          ({v.options.map(opt => opt.value).join(' / ')}: {v.numSales})
+                        </div>
+                      ))
+                  ) : (
+                    <div className="ml-1 text-xs text-orange-500">
+                      ({p.numSales ?? 0})
+                    </div>
+                  )}
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+        {/* الأقل تفاعلاً */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-4 flex flex-col items-center border-l-4 border-blue-500">
+          <div className="text-3xl mb-2">📉</div>
+          <div className="font-bold text-lg mb-1">Produits sans ventes</div>
+          <div className="text-sm text-gray-500 mb-2">Zero sales</div>
+          <ul className="text-sm text-gray-700 dark:text-gray-200 max-h-32 overflow-y-auto w-full">
+            {zeroSales.length === 0 ? <li>Aucun produit</li> : zeroSales.map(p => <li key={p._id}>{p.name}</li>)}
+          </ul>
+        </div>
+      </div>
+
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestion des Produits</h1>
         <div className="flex gap-4">
@@ -868,6 +961,34 @@ export default function AdminProductsPage() {
             >
               {editLoading ? 'Enregistrement...' : 'Enregistrer'}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* نافذة منبثقة لكل المنتجات التي ستوكها أقل من 5 */}
+      {lowStockModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-6 w-full max-w-2xl relative animate-fade-in max-h-[90vh] overflow-y-auto">
+            <button onClick={() => setLowStockModalOpen(false)} className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
+            <h2 className="text-xl font-bold mb-4 text-yellow-500 text-center">Tous les produits presque épuisés</h2>
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="bg-gray-100 dark:bg-gray-800">
+                  <th className="px-3 py-2 text-left">Produit</th>
+                  <th className="px-3 py-2 text-left">Attributs</th>
+                  <th className="px-3 py-2 text-center">Stock</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lowStockList.map((item, i) => (
+                  <tr key={item.product._id + '-' + i} className="border-b border-gray-200 dark:border-gray-800">
+                    <td className="px-3 py-2">{item.product.name}</td>
+                    <td className="px-3 py-2">{item.attributes || '-'}</td>
+                    <td className="px-3 py-2 text-center text-red-600 font-bold">{item.stock}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

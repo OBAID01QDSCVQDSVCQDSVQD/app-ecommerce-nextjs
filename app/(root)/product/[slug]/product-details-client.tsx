@@ -58,7 +58,13 @@ export default function ProductDetailsClient({ product, relatedProducts }: { pro
   }, [selected, product]);
 
   // الكمية المتوفرة للفاريونت المطابق
-  const availableStock = selectedVariant ? selectedVariant.stock : 0;
+  const availableStock = selectedVariant
+    ? selectedVariant.stock
+    : (product.countInStock ?? product.stock ?? 0);
+
+  // لوج للتشخيص
+  console.log('selectedVariant:', selectedVariant);
+  console.log('availableStock:', availableStock);
 
   // Merge product images with selected attribute images (if any)
   const galleryImages = useMemo(() => {

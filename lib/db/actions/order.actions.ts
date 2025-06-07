@@ -38,13 +38,31 @@ export async function createOrderWithShipping(
 ) {
   await connectToDatabase();
 
+  // دمج الكميات لنفس المنتج/الفاريونت
+  function mergeCartItems(cartItems: CartItem[]) {
+    const merged: CartItem[] = [];
+    for (const item of cartItems) {
+      const found = merged.find(i =>
+        i.product === item.product &&
+        JSON.stringify(i.attributes) === JSON.stringify(item.attributes)
+      );
+      if (found) {
+        found.quantity += item.quantity;
+      } else {
+        merged.push({ ...item });
+      }
+    }
+    return merged;
+  }
+  const mergedCartItems = mergeCartItems(cartItems);
+
   // جلب جميع السمات من قاعدة البيانات
   const attributes = await Attribute.find({});
   const attributesMap = new Map(attributes.map(attr => [attr._id.toString(), attr.name]));
 
   // التحقق من توفر الستوك قبل إنشاء الطلب
   const stockValidation = await Promise.all(
-    cartItems.map(async (item) => {
+    mergedCartItems.map(async (item) => {
       console.log('Item attributes:', JSON.stringify(item.attributes, null, 2));
       const product = await Product.findById(item.product).lean();
       console.log('Product variants:', JSON.stringify(product?.variants, null, 2));
@@ -59,27 +77,14 @@ export async function createOrderWithShipping(
 
       if (product.variants && product.variants.length > 0) {
         // التحقق من الستوك للمتغيرات
-        console.log('Product attributes:', JSON.stringify(product.attributes, null, 2));
-        console.log('Item attributes:', JSON.stringify(item.attributes, null, 2));
-        console.log('Product variants:', JSON.stringify(product.variants, null, 2));
-
-        const variant = product.variants.find(v => {
-          console.log('Checking variant:', JSON.stringify(v, null, 2));
-          const attributeName = attributesMap.get(v.options[0].attributeId.toString());
-          if (!attributeName) return false;
-          
-          // التحقق من وجود السمة في العنصر
-          const match = item.attributes.some((itemAttr: any) => {
-            console.log('Comparing:', {
-              itemAttr,
-              attribute: attributeName,
-              value: v.options[0].value
-            });
-            return itemAttr.attribute === attributeName && itemAttr.value === v.options[0].value;
-          });
-          console.log('Match result:', match);
-          return match;
-        });
+        const variant = product.variants.find(v =>
+          v.options.every(opt => {
+            const attributeName = attributesMap.get(opt.attributeId.toString());
+            return item.attributes.some((itemAttr: any) =>
+              itemAttr.attribute === attributeName && itemAttr.value === opt.value
+            );
+          }) && v.options.length === item.attributes.length
+        );
 
         if (!variant) {
           console.log('No matching variant found');
@@ -130,7 +135,7 @@ export async function createOrderWithShipping(
 
   // جلب بيانات المنتج لكل عنصر
   const cartItemsWithDetails = await Promise.all(
-    cartItems.map(async (item) => {
+    mergedCartItems.map(async (item) => {
       const product = await Product.findById(item.product).lean();
       if (!product) return item;
       let variantDetails = {};
@@ -172,7 +177,7 @@ export async function createOrderWithShipping(
   console.log('cartItemsWithDetails:', cartItemsWithDetails);
 
   // تحديث الستوك لكل منتج
-  for (const item of cartItems) {
+  for (const item of mergedCartItems) {
     const product = await Product.findById(item.product);
     if (!product) continue;
 
@@ -191,6 +196,7 @@ export async function createOrderWithShipping(
 
       if (variant) {
         variant.stock = Math.max(0, variant.stock - item.quantity);
+        variant.numSales += item.quantity;
       }
     } else {
       // تحديث الستوك الرئيسي
@@ -205,6 +211,9 @@ export async function createOrderWithShipping(
     }
 
     await product.save();
+
+    // تحديث عدد المبيعات (numSales)
+    await Product.findByIdAndUpdate(item.product, { $inc: { numSales: item.quantity } });
   }
 
   const shippingDoc = await ShippingInfo.create(shippingData);

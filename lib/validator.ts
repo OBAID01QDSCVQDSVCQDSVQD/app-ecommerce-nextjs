@@ -40,7 +40,8 @@ export const ProductInputSchema = z.object({
       value: z.string()
     })),
     price: z.string().optional(),
-    image: z.string().optional()
+    image: z.string().optional(),
+    numSales: z.number().default(0)
   })).optional(),
   avgRating: z.coerce
     .number()

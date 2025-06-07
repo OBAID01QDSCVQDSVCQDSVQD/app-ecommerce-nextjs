@@ -14,6 +14,13 @@ import { Category } from '@/lib/db/models/category.model'
 export async function createProduct(data: IProductInput) {
   try {
     const product = ProductInputSchema.parse(data)
+    // Ensure numSales is initialized for each variant
+    if (product.variants) {
+      product.variants = product.variants.map(variant => ({
+        ...variant,
+        numSales: variant.numSales || 0
+      }))
+    }
     await connectToDatabase()
     await Product.create(product)
     revalidatePath('/admin/products')
@@ -93,7 +100,7 @@ export async function getAllProductsForAdmin({
 
   const order: Record<string, 1 | -1> =
     sort === 'best-selling'
-      ? { numSales: -1 }
+      ? { 'variants.numSales': -1, numSales: -1 }
       : sort === 'price-low-to-high'
         ? { price: 1 }
         : sort === 'price-high-to-low'
@@ -270,7 +277,7 @@ export async function getAllProducts({
       : {}
   const order: Record<string, 1 | -1> =
     sort === 'best-selling'
-      ? { numSales: -1 }
+      ? { 'variants.numSales': -1, numSales: -1 }
       : sort === 'price-low-to-high'
         ? { price: 1 }
         : sort === 'price-high-to-low'

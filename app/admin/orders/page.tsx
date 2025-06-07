@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
 
 interface Order {
   _id: string;
@@ -115,6 +117,7 @@ export default function AdminOrdersPage() {
     }
     if (filters.dateTo) {
       const to = new Date(filters.dateTo);
+      to.setHours(23, 59, 59, 999);
       result = result.filter(order => new Date(order.createdAt) <= to);
     }
     setFilteredOrders(result);
@@ -143,6 +146,60 @@ export default function AdminOrdersPage() {
     }
   };
 
+  // حساب عدد الطلبات الجديدة اليوم وهذا الأسبوع
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+  const ordersToday = orders.filter(order => new Date(order.createdAt) >= startOfToday).length;
+  const ordersThisWeek = orders.filter(order => new Date(order.createdAt) >= startOfWeek).length;
+
+  const exportToExcel = () => {
+    const data = filteredOrders.map(order => ({
+      'N°': order.orderNumber || order._id.slice(-6).toUpperCase(),
+      'Client': order.userId?.name || `${order.shippingInfo?.firstName || ''} ${order.shippingInfo?.lastName || ''}`,
+      'Téléphone': order.shippingInfo?.phone || '-',
+      'Adresse': `${order.shippingInfo?.address || ''} ${order.shippingInfo?.city || ''} ${order.shippingInfo?.country || ''} ${order.shippingInfo?.postalCode || ''}`.trim(),
+      'Total': order.totalPrice,
+      'Statut': statusLabels[order.status] || order.status,
+      'Date': new Date(order.createdAt).toLocaleDateString('fr-FR'),
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Commandes');
+    XLSX.writeFile(wb, 'commandes.xlsx');
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(10);
+    doc.text('Liste des commandes', 10, 10);
+    const headers = [['N°', 'Client', 'Téléphone', 'Adresse', 'Total', 'Statut', 'Date']];
+    const rows = filteredOrders.map(order => [
+      order.orderNumber || order._id.slice(-6).toUpperCase(),
+      order.userId?.name || `${order.shippingInfo?.firstName || ''} ${order.shippingInfo?.lastName || ''}`,
+      order.shippingInfo?.phone || '-',
+      `${order.shippingInfo?.address || ''} ${order.shippingInfo?.city || ''} ${order.shippingInfo?.country || ''} ${order.shippingInfo?.postalCode || ''}`.trim(),
+      order.totalPrice,
+      statusLabels[order.status] || order.status,
+      new Date(order.createdAt).toLocaleDateString('fr-FR'),
+    ]);
+    // Simple table rendering
+    let y = 20;
+    headers.concat(rows).forEach(row => {
+      let x = 10;
+      row.forEach(cell => {
+        doc.text(String(cell), x, y);
+        x += 35;
+      });
+      y += 8;
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+    });
+    doc.save('commandes.pdf');
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto bg-gray-100 dark:bg-gray-950 min-h-screen">
       <div className="flex justify-between items-center mb-6">
@@ -153,6 +210,30 @@ export default function AdminOrdersPage() {
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414A1 1 0 0013 13.414V19a1 1 0 01-1.447.894l-4-2A1 1 0 017 17V13.414a1 1 0 00-.293-.707L3 6.707A1 1 0 013 6V4z" /></svg>
           Filtres
+        </button>
+      </div>
+      <div className="flex gap-4 mb-6">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-4 flex flex-col items-center border-l-4 border-blue-500 min-w-[160px]">
+          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{ordersToday}</div>
+          <div className="text-sm text-gray-700 dark:text-gray-200 mt-1">Commandes aujourd'hui</div>
+        </div>
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-4 flex flex-col items-center border-l-4 border-green-500 min-w-[160px]">
+          <div className="text-2xl font-bold text-green-600 dark:text-green-400">{ordersThisWeek}</div>
+          <div className="text-sm text-gray-700 dark:text-gray-200 mt-1">Commandes cette semaine</div>
+        </div>
+        <button
+          onClick={exportToExcel}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 shadow hover:bg-green-50 dark:hover:bg-green-800 text-green-600 dark:text-green-400 text-sm font-semibold transition cursor-pointer"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path strokeLinecap="round" strokeLinejoin="round" d="M8 2h8v4H8z" /></svg>
+          Exporter Excel
+        </button>
+        <button
+          onClick={exportToPDF}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 shadow hover:bg-red-50 dark:hover:bg-red-800 text-red-600 dark:text-red-400 text-sm font-semibold transition cursor-pointer"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19.5 3 21l1.5-4L16.5 3.5z" /></svg>
+          Exporter PDF
         </button>
       </div>
       {/* Filters Modal/Panel */}
