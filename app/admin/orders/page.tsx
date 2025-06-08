@@ -149,9 +149,16 @@ export default function AdminOrdersPage() {
   // حساب عدد الطلبات الجديدة اليوم وهذا الأسبوع
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+  const day = now.getDay() || 7; // 0 (Sunday) becomes 7
+  const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + 1);
   const ordersToday = orders.filter(order => new Date(order.createdAt) >= startOfToday).length;
   const ordersThisWeek = orders.filter(order => new Date(order.createdAt) >= startOfWeek).length;
+
+  console.log('orders createdAt:', orders.map(o => o.createdAt));
+  orders.forEach(o => {
+    const d = new Date(o.createdAt);
+    console.log('Order:', o.createdAt, 'Parsed:', d, '>= startOfToday:', d >= startOfToday, '>= startOfWeek:', d >= startOfWeek);
+  });
 
   const exportToExcel = () => {
     const data = filteredOrders.map(order => ({
@@ -212,7 +219,7 @@ export default function AdminOrdersPage() {
           Filtres
         </button>
       </div>
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-4 mb-6 overflow-x-auto whitespace-nowrap">
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-4 flex flex-col items-center border-l-4 border-blue-500 min-w-[160px]">
           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{ordersToday}</div>
           <div className="text-sm text-gray-700 dark:text-gray-200 mt-1">Commandes aujourd'hui</div>
