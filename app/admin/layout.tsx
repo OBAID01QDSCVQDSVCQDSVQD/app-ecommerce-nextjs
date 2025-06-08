@@ -49,7 +49,7 @@ export default function AdminLayout({
         <div className="relative">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="sticky top-4 left-4 z-30 flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white shadow-md md:hidden focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
+            className="fixed top-35 left-4 z-50 flex items-center justify-center w-10 h-10 rounded-full bg-blue-400 text-white shadow-lg md:hidden focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
             aria-label="Ouvrir le menu"
           >
             {isSidebarOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
@@ -82,7 +82,7 @@ export default function AdminLayout({
           {/* Overlay only inside body */}
           {isSidebarOpen && (
             <div
-              className="absolute inset-0 bg-black bg-opacity-40 z-0 md:hidden"
+              className="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-0 md:hidden"
               onClick={() => setIsSidebarOpen(false)}
             />
           )}
