@@ -11,7 +11,7 @@ const ProductPrice = ({
   basePrice,
   baseListPrice,
 }: {
-  price: number
+  price: number | undefined | null
   isDeal?: boolean
   listPrice?: number
   className?: string
@@ -20,6 +20,9 @@ const ProductPrice = ({
   basePrice?: number
   baseListPrice?: number
 }) => {
+  if (price === undefined || price === null || isNaN(Number(price))) {
+    return <span className={className}>Non disponible</span>;
+  }
   const discountPercent = baseListPrice && basePrice
     ? Math.round(100 - (basePrice / baseListPrice) * 100)
     : Math.round(100 - (price / listPrice) * 100)

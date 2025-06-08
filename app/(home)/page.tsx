@@ -5,6 +5,7 @@ import data from '@/lib/data'
 import { getAllCategories, getProductsForCard, getProductsByTag } from '@/lib/actions/product.actions' 
 import ProductSlider from '@/components/shared/product/product-slider'
 import BrowsingHistoryList from '@/components/shared/browsing-history-list'
+import BookingButtonWithModal from '@/components/BookingButtonWithModal'
 
 export default async function HomePage() {
   const categories = (await getAllCategories()).slice(0, 4)
@@ -34,8 +35,6 @@ export default async function HomePage() {
         image: category.image || '/placeholder.jpg',
         href: `/category/${category.slug}`,
       }))
-      
-     
     },
     {
       title: 'Explore New Arrivals',
@@ -65,9 +64,8 @@ export default async function HomePage() {
 
   return (
     <>
-      console.log('🎯 categories:', categories)
-
       <HomeCarousel items={data.carousels} />
+      <BookingButtonWithModal />
       <div className='md:p-4 md:space-y-4 bg-border'>
         <HomeCard cards={cards} />
         <Card className='w-full rounded-none'>
@@ -81,7 +79,6 @@ export default async function HomePage() {
             products={bestSellingProducts} 
             hideDetails
             />
-            
           </CardContent>
         </Card>
       </div>

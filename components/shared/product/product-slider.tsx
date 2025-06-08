@@ -29,9 +29,9 @@ export default function ProductSlider({
       <h2 className='text-xl md:text-2xl font-extrabold mb-5 text-gray-900 dark:text-white'>{title}</h2>
       <Carousel opts={{ align: 'start' }} className='w-full' plugins={[plugin.current]}>
         <CarouselContent>
-          {products.map((product) => (
+          {products.map((product, idx) => (
             <CarouselItem
-              key={product.slug}
+              key={product._id || product.slug || idx}
               className={
                 hideDetails
                   ? 'md:basis-1/4 lg:basis-1/6'

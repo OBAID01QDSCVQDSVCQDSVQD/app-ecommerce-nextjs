@@ -486,9 +486,9 @@ export default function AdminOrdersPage() {
                           <div>Qté: <span className="font-bold text-gray-700 dark:text-gray-200">{item.quantity}</span></div>
                           <div>Prix: <span className="font-bold text-primary dark:text-yellow-400">{Number(item.price).toLocaleString('fr-TN', { minimumFractionDigits: 3 })} <span className="ml-1">DT</span></span></div>
                           <div>Total: <span className="font-bold">{Number(item.price * item.quantity).toLocaleString('fr-TN', { minimumFractionDigits: 3 })} <span className="ml-1">DT</span></span></div>
-                        </div>
-                      </div>
-                    </div>
+            </div>
+              </div>
+            </div>
                   ))}
                 </div>
               </div>

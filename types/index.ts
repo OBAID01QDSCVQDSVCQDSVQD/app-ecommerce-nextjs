@@ -40,3 +40,28 @@ export type OrderItem = z.infer<typeof OrderItemSchema> & {
 export type Cart = z.infer<typeof CartSchema>
 
 console.log('cart items:', CartSchema)
+
+export interface IService {
+  _id: string;
+  name: string;
+  description?: string;
+  image?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IAppointment {
+  _id: string;
+  userId: string | null;
+  clientName: string;
+  phone: string;
+  address: string;
+  serviceId: string;
+  description?: string;
+  photos: string[];
+  dates: string[];
+  hours: string[];
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}

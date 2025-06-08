@@ -25,7 +25,7 @@ export function HomeCard({ cards }: { cards: CardItem[] }) {
               {card.items.map((item) => (
                 <Link
                   key={item.name}
-                  href={item.href}
+                  href={item.href || '/'}
                   className='flex flex-col'
                 >
                   <Image
@@ -44,7 +44,7 @@ export function HomeCard({ cards }: { cards: CardItem[] }) {
           </CardContent>
           {card.link && (
             <CardFooter>
-              <Link href={card.link.href} className='mt-4 block'>
+              <Link href={card.link.href || '/'} className='mt-4 block'>
                 {card.link.text}
               </Link>
             </CardFooter>
