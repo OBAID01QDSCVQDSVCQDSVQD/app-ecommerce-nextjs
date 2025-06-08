@@ -423,15 +423,15 @@ export default function AdminProductsPage() {
     }
     return []
   }
-  const lowStockList = products.flatMap(p => getLowStockVariants(p).map(v => ({ product: p, ...v })));
+  const lowStockList = (Array.isArray(products) ? products : []).flatMap(p => getLowStockVariants(p).map(v => ({ product: p, ...v })));
 
   // --- قسم المنتجات المميزة ---
-  const bestSellers = [...products].sort((a, b) => {
+  const bestSellers = [...(Array.isArray(products) ? products : [])].sort((a, b) => {
     const aVariantSales = a.variants?.reduce((sum, v) => sum + (v.numSales || 0), 0) || 0;
     const bVariantSales = b.variants?.reduce((sum, v) => sum + (v.numSales || 0), 0) || 0;
     return bVariantSales - aVariantSales || (b.numSales || 0) - (a.numSales || 0);
   }).slice(0, 5);
-  const zeroSales = products.filter(p => {
+  const zeroSales = (Array.isArray(products) ? products : []).filter(p => {
     const variantSales = p.variants?.reduce((sum, v) => sum + (v.numSales || 0), 0) || 0;
     return variantSales === 0 && (p.numSales || 0) === 0;
   });
