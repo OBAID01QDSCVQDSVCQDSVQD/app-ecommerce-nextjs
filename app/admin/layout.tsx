@@ -55,7 +55,17 @@ export default function AdminLayout({
             {isSidebarOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
           </button>
           {/* Sidebar Panel */}
-          <div className={`absolute inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition duration-200 ease-in-out z-10 w-64 bg-white dark:bg-gray-900 shadow-lg`}>
+          <div className={`absolute inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition duration-200 ease-in-out z-10 w-64 bg-white dark:bg-gray-900 shadow-lg
+            ${isSidebarOpen ? 'fixed left-0 h-screen z-50 overflow-y-auto mt-33 md:relative md:h-auto md:overflow-visible' : ''}
+          `}>
+            {/* Close button inside sidebar, only on mobile */}
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="absolute top-4 right-4 z-50 p-2 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 shadow md:hidden"
+              aria-label="Fermer le menu"
+            >
+              <FiX className="w-6 h-6" />
+            </button>
             <div className="p-4 mt-12 md:mt-0">
               <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Tableau de Bord</h1>
             </div>
