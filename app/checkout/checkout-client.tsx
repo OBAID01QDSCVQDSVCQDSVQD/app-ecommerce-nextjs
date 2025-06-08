@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import useCartStore from '@/hooks/use-cart-store'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
+import { useSession } from 'next-auth/react'
 
 export default function CheckoutPage() {
   const {
@@ -16,6 +17,8 @@ export default function CheckoutPage() {
   } = useCartStore()
 
   const router = useRouter()
+  const { data: session } = useSession()
+  const userId = session?.user?.id
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -83,6 +86,7 @@ export default function CheckoutPage() {
           shippingData: shippingDataToSend,
           cartItems: items,
           totalPrice: itemsPrice,
+          userId,
         }),
       });
 

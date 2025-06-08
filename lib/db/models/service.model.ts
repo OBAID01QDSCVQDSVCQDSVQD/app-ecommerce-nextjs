@@ -7,4 +7,8 @@ const ServiceSchema = new Schema({
   image: { type: String },
 }, { timestamps: true });
 
-export const Service = models.Service || model('Service', ServiceSchema); 
+export const Service = models.Service || model('Service', ServiceSchema);
+
+if (!mongoose.models.Service) {
+  mongoose.model('Service', ServiceSchema);
+} 

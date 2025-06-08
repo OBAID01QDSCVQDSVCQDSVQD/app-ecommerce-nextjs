@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaCalendarCheck, FaTimesCircle } from 'react-icons/fa';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
+import { useSession } from 'next-auth/react';
 
 interface AppointmentModalProps {
   open: boolean;
@@ -9,6 +10,8 @@ interface AppointmentModalProps {
 }
 
 export default function AppointmentModal({ open, onClose }: AppointmentModalProps) {
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
   const [services, setServices] = useState<{ _id: string; name: string }[]>([]);
   const [clientName, setClientName] = useState('');
   const [phone, setPhone] = useState('');
@@ -85,6 +88,18 @@ export default function AppointmentModal({ open, onClose }: AppointmentModalProp
     setPhotos(photos => photos.filter((_, i) => i !== index));
   };
 
+  const uploadImageToCloudinary = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'ecommerce-app'); // غيّرها إذا كان لديك preset آخر
+    const res = await fetch('https://api.cloudinary.com/v1_1/dwio60ll1/image/upload', {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+    return data.secure_url;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -105,8 +120,11 @@ export default function AppointmentModal({ open, onClose }: AppointmentModalProp
         setLoading(false);
         return;
       }
-      // Simulate photo upload by just sending file names
-      const photoUrls = photos.map(f => f.name);
+      // رفع الصور إلى Cloudinary
+      let photoUrls: string[] = [];
+      if (photos.length > 0) {
+        photoUrls = await Promise.all(photos.map(file => uploadImageToCloudinary(file)));
+      }
       const res = await fetch('/api/appointments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -121,6 +139,7 @@ export default function AppointmentModal({ open, onClose }: AppointmentModalProp
           photos: photoUrls,
           location,
           googleMapsUrl,
+          userId,
         })
       });
       if (!res.ok) throw new Error('Erreur lors de la soumission.');

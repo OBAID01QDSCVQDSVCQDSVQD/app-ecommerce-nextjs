@@ -2,9 +2,10 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { FiPackage, FiList, FiSettings, FiShoppingCart, FiMenu, FiX, FiTag } from 'react-icons/fi'
+import { FiPackage, FiList, FiSettings, FiShoppingCart, FiMenu, FiX, FiTag, FiCalendar } from 'react-icons/fi'
 import { useState } from 'react'
 
+// تعريف ثابت لقائمة لوحة التحكم
 const menuItems = [
   {
     title: 'Produits',
@@ -15,6 +16,11 @@ const menuItems = [
     title: 'Commandes',
     href: '/admin/orders',
     icon: FiShoppingCart
+  },
+  {
+    title: 'Rendez-vous',
+    href: '/admin/appointments',
+    icon: FiCalendar
   },
   {
     title: 'Catégories',

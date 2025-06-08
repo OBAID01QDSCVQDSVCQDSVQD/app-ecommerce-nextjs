@@ -7,7 +7,7 @@ dotenv.config()
 
 import '@/lib/db/mongoose';
 import { Service } from '@/lib/db/models/service.model';
-console.log('MONGODB_URI:', process.env.MONGODB_URI);
+
 async function addServices() {
   try {
     // التحقق من وجود الخدمات
