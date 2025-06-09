@@ -91,7 +91,7 @@ export default function AppointmentModal({ open, onClose }: AppointmentModalProp
   const uploadImageToCloudinary = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'ecommerce-app'); // غيّرها إذا كان لديك preset آخر
+    formData.append('upload_preset', 'ecommerce-app');
     const res = await fetch('https://api.cloudinary.com/v1_1/dwio60ll1/image/upload', {
       method: 'POST',
       body: formData,
@@ -121,9 +121,10 @@ export default function AppointmentModal({ open, onClose }: AppointmentModalProp
         return;
       }
       // رفع الصور إلى Cloudinary
-      let photoUrls: string[] = [];
-      if (photos.length > 0) {
-        photoUrls = await Promise.all(photos.map(file => uploadImageToCloudinary(file)));
+      const photoUrls = [];
+      for (const file of photos) {
+        const url = await uploadImageToCloudinary(file);
+        photoUrls.push(url);
       }
       const res = await fetch('/api/appointments', {
         method: 'POST',

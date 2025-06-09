@@ -32,9 +32,9 @@ export default function AllAppointmentsPage() {
     dateTo: '',
   });
   const [filteredAppointments, setFilteredAppointments] = useState<Appointment[]>([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalImages, setModalImages] = useState<string[]>([]);
-  const [modalIndex, setModalIndex] = useState(0);
+  const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
+  const [previewPhotoIndex, setPreviewPhotoIndex] = useState<number | null>(null);
+  const [previewAppointment, setPreviewAppointment] = useState<Appointment | null>(null);
 
   useEffect(() => {
     fetchAppointments();
@@ -115,15 +115,6 @@ export default function AllAppointmentsPage() {
       minute: '2-digit'
     });
   };
-
-  const openImageModal = (images: string[], idx: number) => {
-    setModalImages(images);
-    setModalIndex(idx);
-    setModalOpen(true);
-  };
-  const closeImageModal = () => setModalOpen(false);
-  const prevImage = () => setModalIndex(i => (i === 0 ? modalImages.length - 1 : i - 1));
-  const nextImage = () => setModalIndex(i => (i === modalImages.length - 1 ? 0 : i + 1));
 
   if (loading) {
     return (
@@ -282,8 +273,8 @@ export default function AllAppointmentsPage() {
                         key={idx}
                         src={photo}
                         alt={`Photo ${idx + 1}`}
-                        className="w-20 h-20 object-cover rounded-lg border cursor-pointer hover:scale-105 transition"
-                        onClick={() => openImageModal(appointment.photos, idx)}
+                        className="w-20 h-20 object-cover rounded-lg border cursor-pointer"
+                        onClick={() => { setPreviewAppointment(appointment); setPreviewPhotoIndex(idx); }}
                       />
                     ))
                   ) : (
@@ -296,16 +287,47 @@ export default function AllAppointmentsPage() {
         ))}
       </div>
 
-      {/* Modal لعرض الصور */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70">
-          <button onClick={closeImageModal} className="absolute top-4 right-4 text-white text-3xl font-bold">&times;</button>
-          <button onClick={prevImage} className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl font-bold px-2">&#8592;</button>
-          <img src={modalImages[modalIndex]} alt="" className="max-h-[80vh] max-w-[90vw] rounded-xl shadow-2xl border-4 border-white" />
-          <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl font-bold px-2">&#8594;</button>
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white text-sm bg-black/50 px-4 py-1 rounded-full">
-            {modalIndex + 1} / {modalImages.length}
-          </div>
+      {/* Image Preview Modal مع التنقل */}
+      {previewAppointment && previewPhotoIndex !== null && previewAppointment.photos && previewAppointment.photos.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+          onClick={() => { setPreviewPhotoIndex(null); setPreviewAppointment(null); }}
+        >
+          <button
+            className="absolute left-8 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-12 h-12 flex items-center justify-center hover:scale-110 transition border border-gray-200 group"
+            onClick={e => { e.stopPropagation(); setPreviewPhotoIndex(i => (i! > 0 ? i! - 1 : i)); }}
+            disabled={previewPhotoIndex === 0}
+            aria-label="Précédent"
+          >
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="12" fill="white"/>
+              <path d="M14.5 17L10 12L14.5 7" stroke="#222" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <img
+            src={previewAppointment.photos[previewPhotoIndex]}
+            alt="Aperçu"
+            className="max-w-full max-h-[90vh] rounded-lg shadow-2xl border-4 border-white"
+            onClick={e => e.stopPropagation()}
+          />
+          <button
+            className="absolute right-8 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full w-12 h-12 flex items-center justify-center hover:scale-110 transition border border-gray-200 group"
+            onClick={e => { e.stopPropagation(); setPreviewPhotoIndex(i => (i! < previewAppointment.photos.length - 1 ? i! + 1 : i)); }}
+            disabled={previewPhotoIndex === previewAppointment.photos.length - 1}
+            aria-label="Suivant"
+          >
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="12" fill="white"/>
+              <path d="M9.5 7L14 12L9.5 17" stroke="#222" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <button
+            className="absolute top-8 right-8 text-white text-3xl font-bold"
+            onClick={() => { setPreviewPhotoIndex(null); setPreviewAppointment(null); }}
+            aria-label="Fermer"
+          >
+            &times;
+          </button>
         </div>
       )}
     </div>

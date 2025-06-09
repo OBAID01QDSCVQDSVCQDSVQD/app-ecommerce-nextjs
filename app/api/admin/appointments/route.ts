@@ -1,26 +1,31 @@
-import '@/lib/db/mongoose';
+import { Appointment } from "@/lib/db/models/appointment.model";
+import { NextResponse } from "next/server";
 import { Service } from '@/lib/db/models/service.model';
-import { Appointment } from '@/lib/db/models/appointment.model';
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authConfig } from '@/auth';
 
-export async function GET() {
+export async function GET(req: Request) {
+  // إذا كان هناك ?checkServices=true في الرابط، نفذ الفحص
+  const url = req ? new URL(req.url) : null;
+  if (url && url.searchParams.get('checkServices') === 'true') {
+    // جلب جميع serviceId من appointments
+    const appointments = await Appointment.find();
+    const allServiceIds = appointments.map(a => a.serviceId?.toString()).filter(Boolean);
+    // جلب جميع _id من مجموعة الخدمات
+    const services = await Service.find({}, '_id');
+    const validServiceIds = services.map(s => s._id.toString());
+    // إيجاد الـ id غير الموجودة
+    const invalidServiceIds = allServiceIds.filter(id => !validServiceIds.includes(id));
+    return NextResponse.json({ invalidServiceIds });
+  }
+  // الكود العادي بدون populate
   try {
     const appointments = await Appointment.find()
       .populate('serviceId', 'name')
       .sort({ createdAt: -1 });
-    const missingServices = appointments
-      .filter(a => typeof a.serviceId === 'string')
-      .map(a => a.serviceId);
-    return NextResponse.json({ appointments, missingServices });
-  } catch (error: unknown) {
+    return NextResponse.json({ appointments });
+  } catch (error) {
     console.error('Error fetching appointments:', error);
     return NextResponse.json(
-      {
-        error: 'Error fetching appointments',
-        details: error instanceof Error ? error.message : String(error)
-      },
+      { error: 'Error fetching appointments', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
@@ -59,4 +64,4 @@ export async function PUT(req: Request) {
       { status: 500 }
     );
   }
-} 
+}
