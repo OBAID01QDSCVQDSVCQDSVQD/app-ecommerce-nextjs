@@ -48,6 +48,7 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit)
     })
   } catch (error) {
+    console.error('API /api/products error:', error);
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }

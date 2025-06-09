@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FaCalendarCheck, FaTimesCircle } from 'react-icons/fa';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { useSession } from 'next-auth/react';
+import imageCompression from 'browser-image-compression';
 
 interface AppointmentModalProps {
   open: boolean;
@@ -89,8 +90,21 @@ export default function AppointmentModal({ open, onClose }: AppointmentModalProp
   };
 
   const uploadImageToCloudinary = async (file: File) => {
+    // ضغط الصورة قبل الرفع
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1200,
+      useWebWorker: true,
+    };
+    let compressedFile = file;
+    try {
+      compressedFile = await imageCompression(file, options);
+    } catch (err) {
+      // إذا فشل الضغط استخدم الملف الأصلي
+      console.warn('فشل ضغط الصورة، سيتم رفع الأصلية', err);
+    }
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', compressedFile);
     formData.append('upload_preset', 'ecommerce-app');
     const res = await fetch('https://api.cloudinary.com/v1_1/dwio60ll1/image/upload', {
       method: 'POST',

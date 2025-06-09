@@ -437,10 +437,10 @@ export default function AdminProductsPage() {
   });
 
   if (loading) {
-    return <div className="flex justify-center items-center h-32">جاري التحميل...</div>;
+    return <div className="flex justify-center items-center h-32">Chargement en cours... </div>;
   }
   if (products.length === 0) {
-    return <div className="text-center text-gray-500">لا توجد منتجات</div>;
+    return <div className="text-center text-gray-500">Aucun produit disponible</div>;
   }
 
   return (

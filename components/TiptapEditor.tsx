@@ -8,6 +8,7 @@ import TextStyle from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
 import { Button } from '@/components/ui/button'
 import { FiBold, FiItalic, FiList, FiAlignLeft, FiAlignCenter, FiAlignRight } from 'react-icons/fi'
+import { RawCommands } from '@tiptap/core'
 
 // ✅ تعريف TypeScript لأوامر مخصصة
 import '@tiptap/core'
@@ -39,15 +40,15 @@ const FontSize = TextStyle.extend({
     return {
       setFontSize:
         (size: string) =>
-        ({ chain }) => {
+        ({ chain }: { chain: any }) => {
           return chain().setMark('textStyle', { fontSize: size }).run()
         },
       unsetFontSize:
         () =>
-        ({ chain }) => {
+        ({ chain }: { chain: any }) => {
           return chain().setMark('textStyle', { fontSize: null }).run()
         },
-    }
+    } as any;
   },
 })
 
@@ -135,7 +136,7 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
         <select
           title="Taille de police"
           className="ml-2 rounded border-gray-300 dark:bg-gray-800 dark:text-gray-100"
-          onChange={e => editor.chain().focus().setFontSize(e.target.value).run()}
+          onChange={e => (editor.chain() as any).focus().setFontSize(e.target.value).run()}
           defaultValue=""
         >
           <option value="">Taille</option>
