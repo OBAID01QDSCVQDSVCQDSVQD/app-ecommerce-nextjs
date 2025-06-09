@@ -436,6 +436,13 @@ export default function AdminProductsPage() {
     return variantSales === 0 && (p.numSales || 0) === 0;
   });
 
+  if (loading) {
+    return <div className="flex justify-center items-center h-32">جاري التحميل...</div>;
+  }
+  if (products.length === 0) {
+    return <div className="text-center text-gray-500">لا توجد منتجات</div>;
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-8 text-primary dark:text-yellow-400">Gestion des produits</h1>

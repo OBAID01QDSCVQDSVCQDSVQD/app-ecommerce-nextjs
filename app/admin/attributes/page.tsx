@@ -69,9 +69,10 @@ export default function AdminAttributesPage() {
         {loading ? (
           <div className="flex justify-center items-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-3">Chargement en cours...</span>
           </div>
         ) : attributes.length === 0 ? (
-          <div className="text-center text-gray-500 dark:text-gray-400 py-8">Aucun attribut trouvé.</div>
+          <div className="text-center text-gray-500 dark:text-gray-400 py-8">Aucun attribut disponible</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

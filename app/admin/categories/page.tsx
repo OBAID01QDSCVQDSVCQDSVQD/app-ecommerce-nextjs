@@ -177,7 +177,10 @@ export default function AdminCategoriesPage() {
       {loading ? (
         <div className="flex justify-center items-center h-32">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <span className="ml-3">Chargement en cours...</span>
         </div>
+      ) : categories.length === 0 ? (
+        <div className="text-center text-gray-500 dark:text-gray-400 py-8">Aucune catégorie disponible</div>
       ) : error ? (
         <div className="text-center text-red-600 font-bold py-8">{error}</div>
       ) : (

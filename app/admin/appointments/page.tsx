@@ -120,6 +120,7 @@ export default function AllAppointmentsPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
+        <span className="ml-3 text-lg">Chargement en cours...</span>
       </div>
     );
   }
@@ -186,9 +187,9 @@ export default function AllAppointmentsPage() {
 
       {/* Liste des rendez-vous */}
       <div className="space-y-6">
-        {filteredAppointments.length === 0 && (
+        {filteredAppointments.length === 0 && !loading && (
           <div className="text-center text-gray-500 dark:text-gray-300 py-8">
-            Aucun rendez-vous trouvé.
+            Aucun rendez-vous disponible
           </div>
         )}
         {filteredAppointments.map((appointment) => (

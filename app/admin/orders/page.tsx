@@ -207,6 +207,18 @@ export default function AdminOrdersPage() {
     doc.save('commandes.pdf');
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-32">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <span className="ml-3">Chargement en cours...</span>
+      </div>
+    );
+  }
+  if (filteredOrders.length === 0) {
+    return <div className="text-center text-gray-500">Aucune commande disponible</div>;
+  }
+
   return (
     <div className="p-6 max-w-7xl mx-auto bg-gray-100 dark:bg-gray-950 min-h-screen">
       <div className="flex justify-between items-center mb-6">
@@ -333,77 +345,69 @@ export default function AdminOrdersPage() {
         </div>
       )}
       <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-6">
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        ) : filteredOrders.length === 0 ? (
-          <div className="text-center text-gray-500 dark:text-gray-400 py-12">Aucune commande trouvée pour ces filtres.</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-800">
-                <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">N°</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Téléphone</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Adresse</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">N°</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Téléphone</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Adresse</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+              {paginatedOrders.map((order, idx) => (
+                <tr key={order._id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <td className="px-4 py-3 font-mono text-xs text-gray-700 dark:text-gray-200 whitespace-nowrap">{order.orderNumber || order._id.slice(-6).toUpperCase()}</td>
+                  <td className="px-4 py-3 text-gray-900 dark:text-gray-100">
+                    {order.userId?.name
+                      ? order.userId.name
+                      : (order.shippingInfo?.firstName || '') + ' ' + (order.shippingInfo?.lastName || '-')}
+                  </td>
+                  <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{order.shippingInfo?.phone || '-'}</td>
+                  <td className="px-4 py-3 text-gray-900 dark:text-gray-100">
+                    {order.shippingInfo?.address || '-'}{order.shippingInfo?.city ? ', ' + order.shippingInfo.city : ''}{order.shippingInfo?.country ? ', ' + order.shippingInfo.country : ''}{order.shippingInfo?.postalCode ? ' ' + order.shippingInfo.postalCode : ''}
+                  </td>
+                  <td className="px-4 py-3 font-semibold text-blue-600 dark:text-blue-400">{Number(order.totalPrice).toLocaleString('fr-TN', { minimumFractionDigits: 3 })} <span className="ml-1">DT</span></td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${statusColors[order.status] || 'bg-gray-200 text-gray-800'}`}>{statusLabels[order.status] || order.status}</span>
+                  </td>
+                  <td className="px-4 py-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">{new Date(order.createdAt).toLocaleDateString('fr-FR')}</td>
+                  <td className="px-4 py-3">
+                    <button
+                      className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                      onClick={() => setSelectedOrder(order)}
+                    >Détails</button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                {paginatedOrders.map((order, idx) => (
-                  <tr key={order._id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="px-4 py-3 font-mono text-xs text-gray-700 dark:text-gray-200 whitespace-nowrap">{order.orderNumber || order._id.slice(-6).toUpperCase()}</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">
-                      {order.userId?.name
-                        ? order.userId.name
-                        : (order.shippingInfo?.firstName || '') + ' ' + (order.shippingInfo?.lastName || '-')}
-                    </td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{order.shippingInfo?.phone || '-'}</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">
-                      {order.shippingInfo?.address || '-'}{order.shippingInfo?.city ? ', ' + order.shippingInfo.city : ''}{order.shippingInfo?.country ? ', ' + order.shippingInfo.country : ''}{order.shippingInfo?.postalCode ? ' ' + order.shippingInfo.postalCode : ''}
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-blue-600 dark:text-blue-400">{Number(order.totalPrice).toLocaleString('fr-TN', { minimumFractionDigits: 3 })} <span className="ml-1">DT</span></td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${statusColors[order.status] || 'bg-gray-200 text-gray-800'}`}>{statusLabels[order.status] || order.status}</span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">{new Date(order.createdAt).toLocaleDateString('fr-FR')}</td>
-                    <td className="px-4 py-3">
-                      <button
-                        className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
-                        onClick={() => setSelectedOrder(order)}
-                      >Détails</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-8 mt-8">
-                <button
-                  className={`px-4 py-2 rounded-lg border ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  Précédent
-                </button>
-                <span className="font-semibold">Page {currentPage} sur {totalPages}</span>
-                <button
-                  className={`px-4 py-2 rounded-lg border ${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  Suivant
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+              ))}
+            </tbody>
+          </table>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-8 mt-8">
+              <button
+                className={`px-4 py-2 rounded-lg border ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                Précédent
+              </button>
+              <span className="font-semibold">Page {currentPage} sur {totalPages}</span>
+              <button
+                className={`px-4 py-2 rounded-lg border ${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Suivant
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       {/* Modal for order details */}
       {selectedOrder && (
@@ -486,9 +490,9 @@ export default function AdminOrdersPage() {
                           <div>Qté: <span className="font-bold text-gray-700 dark:text-gray-200">{item.quantity}</span></div>
                           <div>Prix: <span className="font-bold text-primary dark:text-yellow-400">{Number(item.price).toLocaleString('fr-TN', { minimumFractionDigits: 3 })} <span className="ml-1">DT</span></span></div>
                           <div>Total: <span className="font-bold">{Number(item.price * item.quantity).toLocaleString('fr-TN', { minimumFractionDigits: 3 })} <span className="ml-1">DT</span></span></div>
-            </div>
-              </div>
-            </div>
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
